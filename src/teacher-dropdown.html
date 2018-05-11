@@ -1,0 +1,10 @@
+<template>
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+      textcontent.bind="selectedItem.id || 'Random'">
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <a class="dropdown-item" repeat.for="t of items" click.delegate="selectItem(t)">${t.id}</a>
+    </div>
+  </div>
+</template>

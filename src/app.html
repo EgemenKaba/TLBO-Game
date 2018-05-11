@@ -1,0 +1,100 @@
+<template>
+  <require from="./teacher-dropdown"></require>
+  <require from="./number-format"></require>
+
+  <div class="container">
+    <div clas="row">
+      <h3>Resource management</h3>
+      <lable for="remainingResources">Remaining supplies</lable>
+      <input id="remainingResources" type="number" value.two-way="resources">
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <h3>Population</h3>
+        <table class="table">
+          <thead>
+            <th>Name</th>
+            <th>Parameter One</th>
+            <th>Parameter Two</th>
+            <th>Upcoming costs</th>
+            <th>Previous costs</th>
+          </thead>
+          <tbody>
+            <tr repeat.for="r of tlbo.population">
+              <td>${r.id}</td>
+              <td>${scalePosition(r.position.x) | numberFormat}</td>
+              <td>${scalePosition(r.position.y) | numberFormat}</td>
+              <td>${r.cost | numberFormat}</td>
+              <td>${previousPopulationState[r.id].cost | numberFormat}</td>
+            </tr>
+            <tr>
+              <td colspan="3" class="font-weight-bold">Total</td>
+              <td>${currentTotalCosts | numberFormat}</td>
+              <td>${previousTotalCosts | numberFormat}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="col">
+        <button class="btn btn-large btn-primary" click.delegate="advanceCycle()">cycle</button>
+        <div class="accordion" id="actionAccordion">
+          <div class="card">
+            <div class="card-header" id="headingTeaching">
+              <h5 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseTeaching" aria-controls="collapseTeaching">
+                  Teaching the class
+                </button>
+              </h5>
+            </div>
+            <div id="collapseTeaching" class="collapse" aria-labelledby="headingTeaching" data-parent="#actionAccordion">
+              <div class="card-body">
+                <teacher-dropdown items.bind="getStudents()" selected-item.bind="selectedTeacher"></teacher-dropdown>
+                <br/>
+                <button class="btn btn-primary" click.delegate="performTeaching()">Perform</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header" id="headingStudying">
+              <h5 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseStudying" aria-controls="collapseStudying">
+                  Group work
+                </button>
+              </h5>
+            </div>
+
+            <div id="collapseStudying" class="collapse" aria-labelledby="headingStudying" data-parent="#actionAccordion">
+              <div class="card-body">
+                <table class="table">
+                  <thead>
+                    <th>Student</th>
+                    <th>Teacher</th>
+                  </thead>
+                  <tbody>
+                    <tr repeat.for="r of studentTeacherMap">
+                      <td>${r.student.id}</td>
+                      <td>
+                        <teacher-dropdown items.bind="getStudents()" selected-item.bind="r.teacher"></teacher-dropdown>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <br/>
+                <button class="btn btn-primary" click.delegate="performLearning()">Perform</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <h3>Visualization</h3>
+        <canvas id="playground" ref="canvas" width="1024" height="1024"></canvas>
+      </div>
+    </div>
+  </div>
+</template>
