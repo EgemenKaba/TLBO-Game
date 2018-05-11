@@ -25,3 +25,6 @@ yarn install
 Start app:
 
 au run --watch
+
+### In your browser
+http://localhost:8080/#
