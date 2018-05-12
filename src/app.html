@@ -22,7 +22,7 @@
           </thead>
           <tbody>
             <tr repeat.for="r of tlbo.population">
-              <td>${r.id}</td>
+              <td>${r.id}<p if.bind="r == tlbo.currentTeacher"> (teacher)</p></td>
               <td>${scalePosition(r.position.x) | numberFormat}</td>
               <td>${scalePosition(r.position.y) | numberFormat}</td>
               <td>${r.cost | numberFormat}</td>
@@ -84,6 +84,31 @@
                 </table>
                 <br/>
                 <button class="btn btn-primary" click.delegate="performLearning()">Perform</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header" id="headingSingleLesson">
+              <h5 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseSellingLesson" aria-controls="collapseSellingLesson">
+                  Single lesson
+                </button>
+              </h5>
+            </div>
+
+            <div id="collapseSellingLesson" class="collapse" aria-labelledby="headingSingleLesson" data-parent="#actionAccordion">
+              <div class="card-body">
+                <lable for="boostParamOne">Delta parameter one</lable>
+                <input id="boostParamOne" type="number" value.two-way="boostParameterOne">
+                <br/>
+                <lable for="boostParamTwo">Delta parameter two</lable>
+                <input id="boostParamTwo" type="number" value.two-way="boostParameterTwo">
+                <br/>
+                <lable for="singleLessonForDropdown">Single lesson for</lable>
+                <teacher-dropdown id="singleLessonForDropdown" items.bind="getStudents()" selected-item.bind="boostedStudent"></teacher-dropdown>
+                <br/>
+                <button class="btn btn-large btn-primary" click.delegate="boostStudent()">Perform</button>
               </div>
             </div>
           </div>

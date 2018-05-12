@@ -21,6 +21,10 @@ export class App {
   currentTotalCosts: number = 0;
   previousTotalCosts: number = 0;
 
+  boostedStudent: Individual;
+  boostParameterOne: string = '0';
+  boostParameterTwo: string = '0';
+
   loading: boolean = false;
 
   attached() {
@@ -111,7 +115,7 @@ export class App {
 
   performTeaching() {
     this.rememberPreviousState();
-    this.tlbo.currentTeacher = this.selectedTeacher || this.tlbo.currentTeacher;
+    this.tlbo.currentTeacher = this.selectedTeacher || this.getRandomStudent();
     this.tlbo.teachLearners();
     this.drawTLBO();
     this.updateTotalCosts();
@@ -128,6 +132,10 @@ export class App {
 
   scalePosition(position) {
     return (position + (this.tlbo.nMax - this.tlbo.nMin) / 2) * 100;
+  }
+
+  reverseScalePosition(scaledPosition) {
+      return (scaledPosition / 100) - ((this.tlbo.nMax - this.tlbo.nMin) / 2);
   }
 
   getStudents() {
@@ -157,6 +165,23 @@ export class App {
       this.tlbo.population.forEach(element => {
           this.previousPopulationState[element.id] = Object.assign({}, element);
       });
+  }
+
+  boostStudent() {
+      let student: Individual = this.boostedStudent || this.getRandomStudent();
+
+      let rawPixelPositionX = this.scalePosition(student.position.x) + Number.parseFloat(this.boostParameterOne);
+      let rawPixelPositionY = this.scalePosition(student.position.y) + Number.parseFloat(this.boostParameterTwo);
+
+      student.position.x = this.reverseScalePosition(rawPixelPositionX);
+      student.position.y = this.reverseScalePosition(rawPixelPositionY);
+      student.cost = this.tlbo.cost([student.position.x, student.position.y]);
+
+      this.currentTotalCosts = this.getSumOfCosts(this.tlbo.population);
+  }
+
+  getRandomStudent() {
+    return this.tlbo.population[Math.floor(Math.random()*this.tlbo.population.length)];
   }
 }
 

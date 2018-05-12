@@ -137,8 +137,8 @@ export class TLBO {
             let suppliedTeacher = studentTeacherMap && studentTeacherMap.find(map => {
                 return map.student.id == element.id;
             });
-
-            if (suppliedTeacher) { 
+            
+            if (suppliedTeacher && suppliedTeacher.teacher) { 
                 teacher = suppliedTeacher.teacher;
             } else {
                 let candidates = Array.apply(null, {length: this.population.length}).map(Number.call, Number);
