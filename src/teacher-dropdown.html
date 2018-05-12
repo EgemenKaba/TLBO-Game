@@ -4,6 +4,7 @@
       textcontent.bind="selectedItem.id || 'Random'">
     </button>
     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <a class="dropdown-item" click.delegate="emptySelectedElement()">Random</a>
       <a class="dropdown-item" repeat.for="t of items" click.delegate="selectItem(t)">${t.id}</a>
     </div>
   </div>

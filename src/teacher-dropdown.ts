@@ -15,4 +15,8 @@ export class TeacherDropdown {
     selectItem(item) {
         this.selectedItem = item;
     }
+
+    emptySelectedElement() {
+        this.selectedItem = undefined;
+    }
 }
