@@ -1,6 +1,6 @@
 import {TLBO} from './tlbo';
 import { Individual } from 'individual';
-import { IndividualsMap } from './individuals-map';
+import { GroupedIndividuals } from './individuals-map';
 
 interface IPreviousCostsDictionary {
     [index: string]: Individual;
@@ -8,18 +8,19 @@ interface IPreviousCostsDictionary {
 
 export class App {
 
+    debug: boolean = true;
+    autopilot: boolean = true;
+
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   tlbo: TLBO = new TLBO();
 
-  studentTeacherMap: IndividualsMap[] = [];
+  studentTeacherMap: GroupedIndividuals[] = [];
   previousPopulationState = {} as IPreviousCostsDictionary;
   
   selectedTeacher: Individual;
 
   resources: number = 1000;
-  currentTotalCosts: number = 0;
-  previousTotalCosts: number = 0;
 
   boostedStudent: Individual;
   boostParameterOne: string = '0';
@@ -27,17 +28,31 @@ export class App {
 
   loading: boolean = false;
 
-  attached() {
-    this.context = this.canvas.getContext('2d');
+  idleIndividuals: Individual[] = [];
+  groupWorkIndividuals: Individual[] = [];
+  teachingSessionIndividuals: Individual[] = [];
 
-    this.drawTLBO();
+  idleIndividualsSum: number = 0;
+  groupWorkIndividualsSum: number = 0;
+  teachingSessionIndividualsSum: number = 0;
+  currentTotalCosts: number = 0;
+
+  idleIndividualsSumPrev: number;
+  groupWorkIndividualsSumPrev: number;
+  teachingSessionIndividualsSumPrev: number;
+  previousTotalCosts: number;
+
+  attached() {
+    if (this.debug) {
+        this.context = this.canvas.getContext('2d');
+        this.drawTLBO();
+    }
+    this.refreshSums();
     this.updateTotalCosts();
   }
 
   constructor() {
-    this.tlbo.population.forEach(element => {
-      this.studentTeacherMap.push(new IndividualsMap(element, undefined));
-    });
+    this.idleIndividuals = this.tlbo.population;
   }
 
   drawTLBO() {
@@ -94,11 +109,7 @@ export class App {
         this.drawIndividual(element.position.x, element.position.y, 'purple');
     });
   };
-
-  setLoading(loading: boolean) {
-      this.loading = loading;
-  }
-
+/*
   advanceCycle() {
     this.rememberPreviousState();
     this.tlbo.cycle();
@@ -129,98 +140,145 @@ export class App {
     this.updateTotalCosts();
     this.resources -= this.currentTotalCosts;
   }
+*/
+
+  simulateNextRound() {
+      this.rememberPreviousState();
+
+      if (this.autopilot) {
+        this.tlbo.cycle();
+      } else {
+        if (this.teachingSessionIndividuals && this.teachingSessionIndividuals.length > 0) {
+            this.selectedTeacher = this.selectedTeacher || this.getRandomStudent(this.teachingSessionIndividuals);
+            this.tlbo.teachPopulation(this.selectedTeacher, this.teachingSessionIndividuals);
+          }
+          
+          if (this.studentTeacherMap && this.studentTeacherMap.length > 0) {
+            this.fillInEmptyPairings(this.studentTeacherMap, this.groupWorkIndividuals);
+            this.tlbo.exchangeKnowledge(this.studentTeacherMap);
+          }
+      }
+      
+      this.refreshSums();
+      this.updateTotalCosts();
+
+      if (this.debug) {
+          this.drawTLBO();
+      }
+
+      this.resources -= Math.trunc(this.currentTotalCosts);
+  }
+
+  fillInEmptyPairings(studentTeacherMap: GroupedIndividuals[], workers: Individual[]) {
+      studentTeacherMap.forEach(element => {
+          if (!element.teacher) {
+              console.log('filling in');
+              element.teacher = this.getRandomStudent(workers);
+              console.log('filled in ' + element.teacher);
+          }
+      });
+  }
+
+  normalizePosition(position) {  
+        return (position - this.tlbo.nMin) / (this.tlbo.nMax - this.tlbo.nMin) * 100;
+  }
+
+  denormalizePosition(normPosition) {
+        return normPosition / 100 * (this.tlbo.nMax - this.tlbo.nMin) + this.tlbo.nMin;
+  }
 
   scalePosition(position) {
     return (position + (this.tlbo.nMax - this.tlbo.nMin) / 2) * 100;
   }
 
   reverseScalePosition(scaledPosition) {
-      return (scaledPosition / 100) - ((this.tlbo.nMax - this.tlbo.nMin) / 2);
+      return (scaledPosition) - ((this.tlbo.nMax - this.tlbo.nMin) / 2);
   }
 
-  getStudents() {
-      return this.studentTeacherMap.map(element => {
+  getStudents(studentTeacherMap: GroupedIndividuals[]) {
+      return studentTeacherMap.map(element => {
           return element.student;
       });
   }
 
   updateTotalCosts() {
       this.previousTotalCosts = this.currentTotalCosts;
-      this.currentTotalCosts = this.getSumOfCosts(this.tlbo.population);
+      this.currentTotalCosts = this.summarizeCost(this.tlbo.population);
   }
 
-  getSumOfCosts(individuals: Individual[]) {
-      let sum = 0;
+  rememberPreviousState() {
+        this.idleIndividualsSumPrev = this.idleIndividualsSum;
+        this.groupWorkIndividualsSumPrev = this.groupWorkIndividualsSum;
+        this.teachingSessionIndividualsSumPrev = this.teachingSessionIndividualsSum;
+  }
 
-      if (individuals && individuals.length > 0) {
-        individuals.forEach(element => {
+  boostStudent(individual: Individual) {
+      let student: Individual = individual || this.getRandomStudent(this.tlbo.population);
+
+      let normalizedPositionX = this.normalizePosition(student.position.x) + Number.parseFloat(this.boostParameterOne);
+      let normalizedPositionY = this.normalizePosition(student.position.y) + Number.parseFloat(this.boostParameterTwo);
+
+      student.position.x = this.denormalizePosition(normalizedPositionX);
+      student.position.y = this.denormalizePosition(normalizedPositionY);
+      student.cost = this.tlbo.cost([student.position.x, student.position.y]);
+
+      this.currentTotalCosts = this.summarizeCost(this.tlbo.population);
+  }
+
+  getRandomStudent(pop: Individual[] = undefined) {
+      if (pop) {
+          return pop[Math.floor(Math.random()*pop.length)];
+      }
+      
+      return this.tlbo.population[Math.floor(Math.random()*this.tlbo.population.length)];
+  }
+
+  changeGroups(source: Individual[], destination: Individual[], individual: Individual) {
+      source.splice(source.indexOf(individual), 1);
+      destination.push(individual);
+
+      // this is dirty
+      this.refreshSums();
+  }
+
+  changeGroupsFromGroupwork(source: GroupedIndividuals[], destination: Individual[], individual: Individual) {
+      source.splice(source.findIndex(
+          element => {
+              return element.student.id == individual.id;
+            }
+        ), 1);
+        destination.push(individual);
+
+        // this is dirty
+        this.groupWorkIndividuals.splice(this.groupWorkIndividuals.indexOf(individual), 1);
+        this.refreshSums();
+  }
+
+  changeGroupsToGroupWork(source: Individual[], destination: GroupedIndividuals[], individual: Individual) {
+    source.splice(source.indexOf(individual), 1);
+    destination.push(new GroupedIndividuals(individual, undefined));
+
+    // this is dirty
+    this.groupWorkIndividuals.push(individual);
+    this.refreshSums();
+  }
+
+  refreshSums() {
+    this.idleIndividualsSum = this.summarizeCost(this.idleIndividuals);
+    this.groupWorkIndividualsSum = this.summarizeCost(this.groupWorkIndividuals);
+    this.teachingSessionIndividualsSum = this.summarizeCost(this.teachingSessionIndividuals);
+  }
+
+  summarizeCost(pop: Individual[]) {
+      let sum: number = 0;
+      
+      if (pop && pop.length > 0) {
+        pop.forEach(element => {
             sum += element.cost;
-          });
+        });
       }
 
       return sum;
   }
 
-  rememberPreviousState() {
-      this.tlbo.population.forEach(element => {
-          this.previousPopulationState[element.id] = Object.assign({}, element);
-      });
-  }
-
-  boostStudent() {
-      let student: Individual = this.boostedStudent || this.getRandomStudent();
-
-      let rawPixelPositionX = this.scalePosition(student.position.x) + Number.parseFloat(this.boostParameterOne);
-      let rawPixelPositionY = this.scalePosition(student.position.y) + Number.parseFloat(this.boostParameterTwo);
-
-      student.position.x = this.reverseScalePosition(rawPixelPositionX);
-      student.position.y = this.reverseScalePosition(rawPixelPositionY);
-      student.cost = this.tlbo.cost([student.position.x, student.position.y]);
-
-      this.currentTotalCosts = this.getSumOfCosts(this.tlbo.population);
-  }
-
-  getRandomStudent() {
-    return this.tlbo.population[Math.floor(Math.random()*this.tlbo.population.length)];
-  }
 }
-
-/*
-/////// notes
-
-this.init = function() {
-    this.resources = 1000;
-    this.nStepped = 0;
-};
-
-this.appendBestSolution = function() {
-    document.getElementById("result").innerHTML = document.getElementById("result").innerHTML + "<br/>" + "cost: " + this.bestSolution.cost + " x: " + this.bestSolution.position.x + " y: " + this.bestSolution.position.y;
-};
-
-this.printBestSolution = function() {
-    document.getElementById("result").innerHTML = "cost: " + this.bestSolution.cost + " x: " + this.bestSolution.position.x + " y: " + this.bestSolution.position.y;
-};
-
-this.displayPopulation = function() {
-    const popContainer = document.getElementById('population');
-    popContainer.innerHTML = '';
-    this.population.forEach(individual => {
-        popContainer.innerHTML = popContainer.innerHTML + '<p>' + individual + '</p>';
-    });
-};
-
-this.updateResources = function() {
-    this.nStepped++;
-
-    let resourceUsage = 0;
-
-    this.population.forEach(element => {
-        resourceUsage += element.cost;
-    });
-
-    this.resources -= resourceUsage;
-
-    const resContainer = document.getElementById('resources');
-    resContainer.innerHTML = 'resources used in turn ' + this.nStepped + ': ' + resourceUsage + '; resources remaining: ' + this.resources;
-};
-*/

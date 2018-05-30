@@ -1,5 +1,5 @@
 import {Individual} from './individual';
-import { IndividualsMap } from 'individuals-map';
+import { GroupedIndividuals } from 'individuals-map';
 
 export class TLBO {
     names: string[] = ['Baldr','Signy','Gunnarr','Aida','Merv','Hikmet','Atifa','Ruzha','Lazar','Aurora','Demyan','Lim','Chelo','Subhash','Gaye','Gwenyth','Muhamad','Ranj','Dinesh','Marit','Deepak','Kjeld','Gerard','Klementina','Riina','Marie','Cathleen','Zahir','Daphne','Sibongile','Josué','Rosalinda','Pratima','Krishna','Aishwarya','Gilad','Janina','Shin','Olwyn','Svante','Vanessa','Cerdic','Ekkebert','Arnaud','Theotleip','Aritra','Serhat','Kuba','Alda','Behiye'];
@@ -31,7 +31,7 @@ export class TLBO {
         const a = 10;
         const b = 0.2;
         const c = 2 * Math.PI;
-        const bias = [0.1*a, -0.2*a, 0.5*a, 0.8*a, -0.1*a];
+        const bias = [a*0, a*0, a*.5, a*.5, a*.5];
 
         let sum1 = 0;
         let sum2 = 0;
@@ -78,6 +78,18 @@ export class TLBO {
         });
     }
 
+    getBestPerformingIndividual(population: Individual[]): Individual {
+        let teacher: Individual = new Individual(0, 0, Number.POSITIVE_INFINITY);
+
+        population.forEach(element => {
+            if (element.cost < teacher.cost) {
+                teacher = element;
+            }
+        });
+
+        return teacher;
+    }
+
     teachLearners() {
         // initiate
         let sumX = 0;
@@ -96,6 +108,29 @@ export class TLBO {
             let teachingFactor = Math.floor(Math.random() * 2 + 1);
             let newX = element.position.x + Math.random() * this.currentTeacher.position.x - teachingFactor * meanX;
             let newY = element.position.y + Math.random() * this.currentTeacher.position.y - teachingFactor * meanY;
+
+            this.evaluate(element, newX, newY);
+        });
+    }
+
+    teachPopulation(teacher: Individual, population: Individual[]) {
+        // initiate
+        let sumX = 0;
+        let sumY = 0;
+
+        population.forEach(element => {
+            sumX += element.position.x;
+            sumY += element.position.y;
+        });
+
+        let meanX = sumX / population.length;
+        let meanY = sumY / population.length;
+
+        // teacher
+        population.forEach(element => {
+            let teachingFactor = Math.floor(Math.random() * 2 + 1);
+            let newX = element.position.x + Math.random() * teacher.position.x - teachingFactor * meanX;
+            let newY = element.position.y + Math.random() * teacher.position.y - teachingFactor * meanY;
 
             this.evaluate(element, newX, newY);
         });
@@ -128,8 +163,8 @@ export class TLBO {
         });
     }
 
-    student(studentTeacherMap: IndividualsMap[] = undefined) {
-        let mapping: IndividualsMap[] = [];
+    student(studentTeacherMap: GroupedIndividuals[] = undefined) {
+        let mapping: GroupedIndividuals[] = [];
 
         this.population.forEach((element, index) => {
             let teacher: Individual;
@@ -148,7 +183,7 @@ export class TLBO {
                 teacher = this.population[teacherIndex];
             }
 
-            mapping.push(new IndividualsMap(element, teacher));
+            mapping.push(new GroupedIndividuals(element, teacher));
         });
 
         mapping.forEach(element => {
@@ -165,6 +200,23 @@ export class TLBO {
 
             this.evaluate(element.student, newX, newY);
         })
+    }
+
+    exchangeKnowledge(groupedIndividuals: GroupedIndividuals[]) {
+        groupedIndividuals.forEach(group => {
+            let stepX = group.student.position.x - group.teacher.position.x;
+            let stepY = group.student.position.y - group.teacher.position.y;
+
+            if (group.teacher.cost < group.student.cost) {
+                stepX = -stepX;
+                stepY = -stepY;
+            }
+
+            let newX = group.student.position.x + Math.random() * stepX;
+            let newY = group.student.position.y + Math.random() * stepY;
+
+            this.evaluate(group.student, newX, newY);
+        });
     }
 
     cycle() {

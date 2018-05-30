@@ -1,6 +1,6 @@
 import { Individual } from "./individual";
 
-export class IndividualsMap {
+export class GroupedIndividuals {
     student: Individual;
     teacher: Individual;
 

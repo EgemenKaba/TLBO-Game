@@ -10,116 +10,149 @@
     </div>
 
     <div class="row">
+      <h3>Summary</h3>
       <div class="col">
-        <h3>Population</h3>
-        <table class="table">
-          <thead>
-            <th>Name</th>
-            <th>Parameter One</th>
-            <th>Parameter Two</th>
-            <th>Upcoming costs</th>
-            <th>Previous costs</th>
-          </thead>
-          <tbody>
-            <tr repeat.for="r of tlbo.population">
-              <td>${r.id}<p if.bind="r == tlbo.currentTeacher"> (teacher)</p></td>
-              <td>${scalePosition(r.position.x) | numberFormat}</td>
-              <td>${scalePosition(r.position.y) | numberFormat}</td>
-              <td>${r.cost | numberFormat}</td>
-              <td>${previousPopulationState[r.id].cost | numberFormat}</td>
-            </tr>
-            <tr>
-              <td colspan="3" class="font-weight-bold">Total</td>
-              <td>${currentTotalCosts | numberFormat}</td>
-              <td>${previousTotalCosts | numberFormat}</td>
-            </tr>
-          </tbody>
-        </table>
+        Total current costs: ${currentTotalCosts | numberFormat}
       </div>
-
       <div class="col">
-        <button class="btn btn-large btn-primary" click.delegate="advanceCycle()">cycle</button>
-        <div class="accordion" id="actionAccordion">
-          <div class="card">
-            <div class="card-header" id="headingTeaching">
-              <h5 class="mb-0">
-                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseTeaching" aria-controls="collapseTeaching">
-                  Teaching the class
-                </button>
-              </h5>
-            </div>
-            <div id="collapseTeaching" class="collapse" aria-labelledby="headingTeaching" data-parent="#actionAccordion">
-              <div class="card-body">
-                <teacher-dropdown items.bind="getStudents()" selected-item.bind="selectedTeacher"></teacher-dropdown>
-                <br/>
-                <button class="btn btn-primary" click.delegate="performTeaching()">Perform</button>
-              </div>
-            </div>
-          </div>
+        Total previous costs: ${previousTotalCosts | numberFormat}
+      </div>
+    </div>
 
-          <div class="card">
-            <div class="card-header" id="headingStudying">
-              <h5 class="mb-0">
-                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseStudying" aria-controls="collapseStudying">
-                  Group work
-                </button>
-              </h5>
-            </div>
+    <div class="row">
+      <h3>Idle population</h3>
+      <table class="table">
+        <thead>
+          <th>Name</th>
+          <th>Parameter One</th>
+          <th>Parameter Two</th>
+          <th>Upcoming costs</th>
+          <th>Previous costs</th>
+          <th>Actions</th>
+        </thead>
+        <tbody>
+          <tr repeat.for="r of idleIndividuals">
+            <td>${r.id}</td>
+            <td>${normalizePosition(r.position.x) | numberFormat}</td>
+            <td>${normalizePosition(r.position.y) | numberFormat}</td>
+            <td>${r.cost | numberFormat}</td>
+            <td>${previousPopulationState[r.id].cost | numberFormat}</td>
+            <td>
+              <button class="btn btn-outline-secondary" click.delegate="changeGroupsToGroupWork(idleIndividuals, studentTeacherMap, r)">Group work</button>
+              <button class="btn btn-outline-secondary" click.delegate="changeGroups(idleIndividuals, teachingSessionIndividuals, r)">Teaching session</button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" class="font-weight-bold">Total</td>
+            <td>${idleIndividualsSum | numberFormat}</td>
+            <td>${idleIndividualsSumPrev | numberFormat}</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-            <div id="collapseStudying" class="collapse" aria-labelledby="headingStudying" data-parent="#actionAccordion">
-              <div class="card-body">
-                <table class="table">
-                  <thead>
-                    <th>Student</th>
-                    <th>Teacher</th>
-                  </thead>
-                  <tbody>
-                    <tr repeat.for="r of studentTeacherMap">
-                      <td>${r.student.id}</td>
-                      <td>
-                        <teacher-dropdown items.bind="getStudents()" selected-item.bind="r.teacher"></teacher-dropdown>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <br/>
-                <button class="btn btn-primary" click.delegate="performLearning()">Perform</button>
-              </div>
-            </div>
-          </div>
+    <div class="row">
+      <h3>Group work population</h3>
+      <table class="table">
+        <thead>
+          <th>Name</th>
+          <th>Parameter One</th>
+          <th>Parameter Two</th>
+          <th>Upcoming costs</th>
+          <th>Previous costs</th>
+          <th>Actions</th>
+          <th>Pairing</th>
+        </thead>
+        <tbody>
+          <tr repeat.for="r of studentTeacherMap">
+            <td>${r.student.id}</td>
+            <td>${normalizePosition(r.student.position.x) | numberFormat}</td>
+            <td>${normalizePosition(r.student.position.y) | numberFormat}</td>
+            <td>${r.student.cost | numberFormat}</td>
+            <td>${previousPopulationState[r.student.id].cost | numberFormat}</td>
+            <td>
+              <button class="btn btn-outline-secondary" click.delegate="changeGroupsFromGroupwork(studentTeacherMap, idleIndividuals, r.student)">Idling</button>
+              <button class="btn btn-outline-secondary" click.delegate="changeGroupsFromGroupwork(studentTeacherMap, teachingSessionIndividuals, r.student)">Teaching session</button>
+            </td>
+            <td>
+              <teacher-dropdown items.bind="groupWorkIndividuals" selected-item.bind="r.teacher"></teacher-dropdown>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" class="font-weight-bold">Total</td>
+            <td>${groupWorkIndividualsSum | numberFormat}</td>
+            <td>${groupWorkIndividualsSumPrev | numberFormat}</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-          <div class="card">
-            <div class="card-header" id="headingSingleLesson">
-              <h5 class="mb-0">
-                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseSellingLesson" aria-controls="collapseSellingLesson">
-                  Single lesson
-                </button>
-              </h5>
-            </div>
-
-            <div id="collapseSellingLesson" class="collapse" aria-labelledby="headingSingleLesson" data-parent="#actionAccordion">
-              <div class="card-body">
-                <lable for="boostParamOne">Delta parameter one</lable>
-                <input id="boostParamOne" type="number" value.two-way="boostParameterOne">
-                <br/>
-                <lable for="boostParamTwo">Delta parameter two</lable>
-                <input id="boostParamTwo" type="number" value.two-way="boostParameterTwo">
-                <br/>
-                <lable for="singleLessonForDropdown">Single lesson for</lable>
-                <teacher-dropdown id="singleLessonForDropdown" items.bind="getStudents()" selected-item.bind="boostedStudent"></teacher-dropdown>
-                <br/>
-                <button class="btn btn-large btn-primary" click.delegate="boostStudent()">Perform</button>
-              </div>
-            </div>
-          </div>
+    <div class="row">
+      <div class="container">
+        <div class="row">
+            <h3>Teaching session population</h3>
+        </div>
+        <div class="row">
+            With teacher:   <teacher-dropdown items.bind="teachingSessionIndividuals" selected-item.bind="selectedTeacher"></teacher-dropdown>
+        </div>
+        <div class="row">
+          <table class="table">
+              <thead>
+                <th>Name</th>
+                <th>Parameter One</th>
+                <th>Parameter Two</th>
+                <th>Upcoming costs</th>
+                <th>Previous costs</th>
+                <th>Actions</th>
+              </thead>
+              <tbody>
+                <tr repeat.for="r of teachingSessionIndividuals">
+                  <td>${r.id}</td>
+                  <td>${normalizePosition(r.position.x) | numberFormat}</td>
+                  <td>${normalizePosition(r.position.y) | numberFormat}</td>
+                  <td>${r.cost | numberFormat}</td>
+                  <td>${previousPopulationState[r.id].cost | numberFormat}</td>
+                  <td>
+                    <button class="btn btn-outline-secondary" click.delegate="changeGroups(teachingSessionIndividuals, idleIndividuals, r)">Idling</button>
+                    <button class="btn btn-outline-secondary" click.delegate="changeGroupsToGroupWork(teachingSessionIndividuals, studentTeacherMap, r)">Group work</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="3" class="font-weight-bold">Total</td>
+                  <td>${teachingSessionIndividualsSum | numberFormat}</td>
+                  <td>${teachingSessionIndividualsSumPrev | numberFormat}</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
         </div>
       </div>
     </div>
+
     <div class="row">
-      <div class="col">
-        <h3>Visualization</h3>
-        <canvas id="playground" ref="canvas" width="1024" height="1024"></canvas>
-      </div>
+      <button class="btn btn-primary btn-lg" click.delegate="simulateNextRound()">Simulate the next round</button>
+    </div>
+
+    <div class="row">
+      <h3>Single lessons</h3>
+      <br/>
+      <lable for="boostParamOne">Delta parameter one</lable>
+      <input id="boostParamOne" type="number" value.two-way="boostParameterOne">
+      <br/>
+      <lable for="boostParamTwo">Delta parameter two</lable>
+      <input id="boostParamTwo" type="number" value.two-way="boostParameterTwo">
+      <br/>
+      <lable for="singleLessonForDropdown">Single lesson for</lable>
+      <teacher-dropdown id="singleLessonForDropdown" items.bind="tlbo.population" selected-item.bind="boostedStudent"></teacher-dropdown>
+      <br/>
+      <button class="btn btn-large btn-primary" click.delegate="boostStudent(boostedStudent)">Perform</button>
+    </div>
+
+    <div class="row" if.bind="debug">
+      <h3>Visualization</h3>
+      <canvas id="playground" ref="canvas" width="1024" height="1024"></canvas>
     </div>
   </div>
 </template>

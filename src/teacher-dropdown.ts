@@ -1,8 +1,9 @@
 import {bindable, bindingMode} from 'aurelia-framework';
+import { Individual } from 'individual';
 
 export class TeacherDropdown {
-    @bindable items: string[];
-    @bindable({ defaultBindingMode: bindingMode.twoWay }) selectedItem: string;
+    @bindable items: Individual[];
+    @bindable({ defaultBindingMode: bindingMode.twoWay }) selectedItem: Individual;
 
     constructor(items) {
         this.items = items;
