@@ -8,7 +8,7 @@ export class TLBO {
     nMax = 5.12;
     nDesignVariables = 2;
     nGenerations = 10;
-    nPopulation = 10;
+    nPopulation = 100;
 
     currentTeacher: Individual;
     bestSolution: Individual = new Individual(0, 0, Number.POSITIVE_INFINITY);
@@ -31,7 +31,7 @@ export class TLBO {
         const a = 10;
         const b = 0.2;
         const c = 2 * Math.PI;
-        const bias = [a*0, a*0, a*.5, a*.5, a*.5];
+        const bias = [-a*.5, -a*.5, a*.5, a*.5, a*.5];
 
         let sum1 = 0;
         let sum2 = 0;
