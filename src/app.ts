@@ -25,6 +25,8 @@ export class App {
     boostedStudent: Individual;
     boostParameterOne: string = '0';
     boostParameterTwo: string = '0';
+    boostParameterThree: string = '0';
+    boostParameterFour: string = '0';
 
     loading: boolean = false;
 
@@ -46,7 +48,6 @@ export class App {
 
     attached() {
         if (this.debug) {
-            this.context = this.canvas.getContext('2d');
             this.drawTLBO();
         }
         this.refreshSums();
@@ -58,6 +59,7 @@ export class App {
     }
 
     drawTLBO() {
+        this.context = this.canvas.getContext('2d');
         this.drawCostFunction();
         this.drawPopulation();
         this.drawTeacher();
@@ -219,14 +221,20 @@ export class App {
 
         let normalizedPositionX = this.normalizePosition(student.position.x) + Number.parseFloat(this.boostParameterOne);
         let normalizedPositionY = this.normalizePosition(student.position.y) + Number.parseFloat(this.boostParameterTwo);
+        let normalizedPositionA = this.normalizePosition(student.position.x) + Number.parseFloat(this.boostParameterThree);
+        let normalizedPositionB = this.normalizePosition(student.position.y) + Number.parseFloat(this.boostParameterFour);
 
         student.position.x = this.denormalizePosition(normalizedPositionX);
         student.position.y = this.denormalizePosition(normalizedPositionY);
+        student.position.a = this.denormalizePosition(normalizedPositionA);
+        student.position.b = this.denormalizePosition(normalizedPositionB);
 
         student.position.x = this.sanitizeSkillBoundaries(student.position.x, 0, this.skillCap);
         student.position.y = this.sanitizeSkillBoundaries(student.position.y, 0, this.skillCap);
+        student.position.a = this.sanitizeSkillBoundaries(student.position.a, 0, this.skillCap);
+        student.position.b = this.sanitizeSkillBoundaries(student.position.b, 0, this.skillCap);
 
-        student.cost = this.tlbo.cost([student.position.x, student.position.y]);
+        student.cost = this.tlbo.cost([student.position.x, student.position.y, student.position.a, student.position.b]);
 
         this.currentTotalCosts = this.summarizeCost(this.tlbo.population);
     }

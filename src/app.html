@@ -35,6 +35,8 @@
           <th>Name</th>
           <th>Parameter One</th>
           <th>Parameter Two</th>
+          <th>Parameter Three</th>
+          <th>Parameter Four</th>
           <th>Upcoming costs</th>
           <th>Previous costs</th>
           <th>Actions</th>
@@ -44,6 +46,8 @@
             <td>${r.id}</td>
             <td>${normalizePosition(r.position.x) | numberFormat}</td>
             <td>${normalizePosition(r.position.y) | numberFormat}</td>
+            <td>${normalizePosition(r.position.a) | numberFormat}</td>
+            <td>${normalizePosition(r.position.b) | numberFormat}</td>
             <td>${r.cost | costFormat}</td>
             <td>${previousPopulationState[r.id].cost | costFormat}</td>
             <td>
@@ -52,7 +56,7 @@
             </td>
           </tr>
           <tr>
-            <td colspan="3" class="font-weight-bold">Total</td>
+            <td colspan="5" class="font-weight-bold">Total</td>
             <td>${idleIndividualsSum | costFormat}</td>
             <td>${idleIndividualsSumPrev | costFormat}</td>
             <td></td>
@@ -68,6 +72,8 @@
           <th>Name</th>
           <th>Parameter One</th>
           <th>Parameter Two</th>
+          <th>Parameter Three</th>
+          <th>Parameter Four</th>
           <th>Upcoming costs</th>
           <th>Previous costs</th>
           <th>Actions</th>
@@ -78,6 +84,8 @@
             <td>${r.student.id}</td>
             <td>${normalizePosition(r.student.position.x) | numberFormat}</td>
             <td>${normalizePosition(r.student.position.y) | numberFormat}</td>
+            <td>${normalizePosition(r.student.position.a) | numberFormat}</td>
+            <td>${normalizePosition(r.student.position.b) | numberFormat}</td>
             <td>${r.student.cost | costFormat}</td>
             <td>${previousPopulationState[r.student.id].cost | costFormat}</td>
             <td>
@@ -89,7 +97,7 @@
             </td>
           </tr>
           <tr>
-            <td colspan="3" class="font-weight-bold">Total</td>
+            <td colspan="5" class="font-weight-bold">Total</td>
             <td>${groupWorkIndividualsSum | costFormat}</td>
             <td>${groupWorkIndividualsSumPrev | costFormat}</td>
             <td></td>
@@ -112,6 +120,8 @@
                 <th>Name</th>
                 <th>Parameter One</th>
                 <th>Parameter Two</th>
+                <th>Parameter Three</th>
+                <th>Parameter Four</th>
                 <th>Upcoming costs</th>
                 <th>Previous costs</th>
                 <th>Actions</th>
@@ -121,6 +131,8 @@
                   <td>${r.id}</td>
                   <td>${normalizePosition(r.position.x) | numberFormat}</td>
                   <td>${normalizePosition(r.position.y) | numberFormat}</td>
+                  <td>${normalizePosition(r.position.a) | numberFormat}</td>
+                  <td>${normalizePosition(r.position.b) | numberFormat}</td>
                   <td>${r.cost | costFormat}</td>
                   <td>${previousPopulationState[r.id].cost | costFormat}</td>
                   <td>
@@ -129,7 +141,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="3" class="font-weight-bold">Total</td>
+                  <td colspan="5" class="font-weight-bold">Total</td>
                   <td>${teachingSessionIndividualsSum | costFormat}</td>
                   <td>${teachingSessionIndividualsSumPrev | costFormat}</td>
                   <td></td>
@@ -152,6 +164,12 @@
       <br/>
       <lable for="boostParamTwo">Delta parameter two</lable>
       <input id="boostParamTwo" type="number" value.two-way="boostParameterTwo">
+      <br/>
+      <lable for="boostParamThree">Delta parameter three</lable>
+      <input id="boostParamThree" type="number" value.two-way="boostParameterThree">
+      <br/>
+      <lable for="boostParamFour">Delta parameter four</lable>
+      <input id="boostParamFour" type="number" value.two-way="boostParameterFour">
       <br/>
       <lable for="singleLessonForDropdown">Single lesson for</lable>
       <teacher-dropdown id="singleLessonForDropdown" items.bind="tlbo.population" selected-item.bind="boostedStudent"></teacher-dropdown>
