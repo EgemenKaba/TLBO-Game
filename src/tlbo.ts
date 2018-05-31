@@ -29,6 +29,11 @@ export class TLBO {
         };
     }
 
+    linear(x) {
+        let sum = x.reduce((sum, num) => {return sum += num;});
+        return this.nMax * x.length - sum;
+    }
+
     rastrigin(x) {
         const a = 10;
         const b = 0.2;
