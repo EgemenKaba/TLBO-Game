@@ -1,6 +1,7 @@
 <template>
   <require from="./teacher-dropdown"></require>
   <require from="./number-format"></require>
+  <require from="./cost-format"></require>
 
   <div class="container">
     <div clas="row">
@@ -12,10 +13,10 @@
     <div class="row">
       <h3>Summary</h3>
       <div class="col">
-        Total current costs: ${currentTotalCosts | numberFormat}
+        Total current costs: ${currentTotalCosts | costFormat}
       </div>
       <div class="col">
-        Total previous costs: ${previousTotalCosts | numberFormat}
+        Total previous costs: ${previousTotalCosts | costFormat}
       </div>
     </div>
 
@@ -35,8 +36,8 @@
             <td>${r.id}</td>
             <td>${normalizePosition(r.position.x) | numberFormat}</td>
             <td>${normalizePosition(r.position.y) | numberFormat}</td>
-            <td>${r.cost | numberFormat}</td>
-            <td>${previousPopulationState[r.id].cost | numberFormat}</td>
+            <td>${r.cost | costFormat}</td>
+            <td>${previousPopulationState[r.id].cost | costFormat}</td>
             <td>
               <button class="btn btn-outline-secondary" click.delegate="changeGroupsToGroupWork(idleIndividuals, studentTeacherMap, r)">Group work</button>
               <button class="btn btn-outline-secondary" click.delegate="changeGroups(idleIndividuals, teachingSessionIndividuals, r)">Teaching session</button>
@@ -44,8 +45,8 @@
           </tr>
           <tr>
             <td colspan="3" class="font-weight-bold">Total</td>
-            <td>${idleIndividualsSum | numberFormat}</td>
-            <td>${idleIndividualsSumPrev | numberFormat}</td>
+            <td>${idleIndividualsSum | costFormat}</td>
+            <td>${idleIndividualsSumPrev | costFormat}</td>
             <td></td>
           </tr>
         </tbody>
@@ -69,8 +70,8 @@
             <td>${r.student.id}</td>
             <td>${normalizePosition(r.student.position.x) | numberFormat}</td>
             <td>${normalizePosition(r.student.position.y) | numberFormat}</td>
-            <td>${r.student.cost | numberFormat}</td>
-            <td>${previousPopulationState[r.student.id].cost | numberFormat}</td>
+            <td>${r.student.cost | costFormat}</td>
+            <td>${previousPopulationState[r.student.id].cost | costFormat}</td>
             <td>
               <button class="btn btn-outline-secondary" click.delegate="changeGroupsFromGroupwork(studentTeacherMap, idleIndividuals, r.student)">Idling</button>
               <button class="btn btn-outline-secondary" click.delegate="changeGroupsFromGroupwork(studentTeacherMap, teachingSessionIndividuals, r.student)">Teaching session</button>
@@ -81,8 +82,8 @@
           </tr>
           <tr>
             <td colspan="3" class="font-weight-bold">Total</td>
-            <td>${groupWorkIndividualsSum | numberFormat}</td>
-            <td>${groupWorkIndividualsSumPrev | numberFormat}</td>
+            <td>${groupWorkIndividualsSum | costFormat}</td>
+            <td>${groupWorkIndividualsSumPrev | costFormat}</td>
             <td></td>
           </tr>
         </tbody>
@@ -112,8 +113,8 @@
                   <td>${r.id}</td>
                   <td>${normalizePosition(r.position.x) | numberFormat}</td>
                   <td>${normalizePosition(r.position.y) | numberFormat}</td>
-                  <td>${r.cost | numberFormat}</td>
-                  <td>${previousPopulationState[r.id].cost | numberFormat}</td>
+                  <td>${r.cost | costFormat}</td>
+                  <td>${previousPopulationState[r.id].cost | costFormat}</td>
                   <td>
                     <button class="btn btn-outline-secondary" click.delegate="changeGroups(teachingSessionIndividuals, idleIndividuals, r)">Idling</button>
                     <button class="btn btn-outline-secondary" click.delegate="changeGroupsToGroupWork(teachingSessionIndividuals, studentTeacherMap, r)">Group work</button>
@@ -121,8 +122,8 @@
                 </tr>
                 <tr>
                   <td colspan="3" class="font-weight-bold">Total</td>
-                  <td>${teachingSessionIndividualsSum | numberFormat}</td>
-                  <td>${teachingSessionIndividualsSumPrev | numberFormat}</td>
+                  <td>${teachingSessionIndividualsSum | costFormat}</td>
+                  <td>${teachingSessionIndividualsSumPrev | costFormat}</td>
                   <td></td>
                 </tr>
               </tbody>

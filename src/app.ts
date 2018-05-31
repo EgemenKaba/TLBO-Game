@@ -42,6 +42,8 @@ export class App {
   teachingSessionIndividualsSumPrev: number;
   previousTotalCosts: number;
 
+  skillCap: number = 25;
+
   attached() {
     if (this.debug) {
         this.context = this.canvas.getContext('2d');
@@ -180,11 +182,11 @@ export class App {
   }
 
   normalizePosition(position) {  
-        return (position - this.tlbo.nMin) / (this.tlbo.nMax - this.tlbo.nMin) * 100;
+        return (position - this.tlbo.nMin) / (this.tlbo.nMax - this.tlbo.nMin) * this.skillCap;
   }
 
   denormalizePosition(normPosition) {
-        return normPosition / 100 * (this.tlbo.nMax - this.tlbo.nMin) + this.tlbo.nMin;
+        return normPosition / this.skillCap * (this.tlbo.nMax - this.tlbo.nMin) + this.tlbo.nMin;
   }
 
   scalePosition(position) {
@@ -220,6 +222,10 @@ export class App {
 
       student.position.x = this.denormalizePosition(normalizedPositionX);
       student.position.y = this.denormalizePosition(normalizedPositionY);
+
+      student.position.x = this.sanitizeSkillBoundaries(student.position.x, 0, this.skillCap);
+      student.position.y = this.sanitizeSkillBoundaries(student.position.y, 0, this.skillCap);
+      
       student.cost = this.tlbo.cost([student.position.x, student.position.y]);
 
       this.currentTotalCosts = this.summarizeCost(this.tlbo.population);
@@ -279,6 +285,10 @@ export class App {
       }
 
       return sum;
+  }
+
+  sanitizeSkillBoundaries(pos: number, lowerLimit: number, upperLimit: number) {
+      return Math.min(upperLimit, Math.max(lowerLimit, pos));
   }
 
 }

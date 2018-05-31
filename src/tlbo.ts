@@ -8,7 +8,7 @@ export class TLBO {
     nMax = 5.12;
     nDesignVariables = 2;
     nGenerations = 10;
-    nPopulation = 100;
+    nPopulation = 25;
 
     currentTeacher: Individual;
     bestSolution: Individual = new Individual(0, 0, Number.POSITIVE_INFINITY);
