@@ -206,18 +206,73 @@ export class App {
 
         this.resources -= Math.trunc(this.currentTotalCosts);
 
-      var pushedRef = firebase.database().ref('games').push({
+      var gameRef = firebase.database().ref('games').push({
         scenario: 1,
         timestamp: Date.now()
       });
-      console.log(pushedRef);
-      var pushedRef = firebase.database().ref('games/' + pushedRef.key + '/turns').push({
-        eng: 0,
-        mec: 1,
-        pil: 2,
-        nav: 3
+      //var turnRef = firebase.database().ref('games/' + gameRef.key + '/turns').push();
+      firebase.database().ref('games/' + gameRef.key + '/turns/').push({
+        1: {
+          eng: 0,
+          mec: 1,
+          pil: 2,
+          nav: 3
+        },
+        2: {
+          eng: 0,
+          mec: 1,
+          pil: 2,
+          nav: 3
+        },
+        3: {
+          eng: 0,
+          mec: 1,
+          pil: 2,
+          nav: 3
+        },
+        4: {
+          eng: 0,
+          mec: 1,
+          pil: 2,
+          nav: 3
+        },
+        5: {
+          eng: 0,
+          mec: 1,
+          pil: 2,
+          nav: 3
+        },
+        6: {
+          eng: 0,
+          mec: 1,
+          pil: 2,
+          nav: 3
+        },
+        7: {
+          eng: 0,
+          mec: 1,
+          pil: 2,
+          nav: 3
+        },
+        8: {
+          eng: 0,
+          mec: 1,
+          pil: 2,
+          nav: 3
+        },
+        9: {
+          eng: 0,
+          mec: 1,
+          pil: 2,
+          nav: 3
+        },
+        10:{
+          eng: 0,
+          mec: 1,
+          pil: 2,
+          nav: 3
+        }
       });
-      console.log(pushedRef);
     }
 
     fillInEmptyPairings(studentTeacherMap: GroupedIndividuals[], workers: Individual[]) {
