@@ -210,7 +210,6 @@ export class App {
         scenario: 1,
         timestamp: Date.now()
       });
-      //var turnRef = firebase.database().ref('games/' + gameRef.key + '/turns').push();
       firebase.database().ref('games/' + gameRef.key + '/turns/').push({
         1: {
           eng: 0,
