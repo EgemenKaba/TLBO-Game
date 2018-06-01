@@ -211,65 +211,68 @@ export class App {
         timestamp: Date.now()
       });
       firebase.database().ref('games/' + gameRef.key + '/turns/').push({
-        1: {
-          eng: 0,
-          mec: 1,
-          pil: 2,
-          nav: 3
-        },
-        2: {
-          eng: 0,
-          mec: 1,
-          pil: 2,
-          nav: 3
-        },
-        3: {
-          eng: 0,
-          mec: 1,
-          pil: 2,
-          nav: 3
-        },
-        4: {
-          eng: 0,
-          mec: 1,
-          pil: 2,
-          nav: 3
-        },
-        5: {
-          eng: 0,
-          mec: 1,
-          pil: 2,
-          nav: 3
-        },
-        6: {
-          eng: 0,
-          mec: 1,
-          pil: 2,
-          nav: 3
-        },
-        7: {
-          eng: 0,
-          mec: 1,
-          pil: 2,
-          nav: 3
-        },
-        8: {
-          eng: 0,
-          mec: 1,
-          pil: 2,
-          nav: 3
-        },
-        9: {
-          eng: 0,
-          mec: 1,
-          pil: 2,
-          nav: 3
-        },
-        10:{
-          eng: 0,
-          mec: 1,
-          pil: 2,
-          nav: 3
+        efficiency: 13.37,
+        characters: {
+          1: {
+            eng: 0,
+            mec: 1,
+            pil: 2,
+            nav: 3
+          },
+          2: {
+            eng: 0,
+            mec: 1,
+            pil: 2,
+            nav: 3
+          },
+          3: {
+            eng: 0,
+            mec: 1,
+            pil: 2,
+            nav: 3
+          },
+          4: {
+            eng: 0,
+            mec: 1,
+            pil: 2,
+            nav: 3
+          },
+          5: {
+            eng: 0,
+            mec: 1,
+            pil: 2,
+            nav: 3
+          },
+          6: {
+            eng: 0,
+            mec: 1,
+            pil: 2,
+            nav: 3
+          },
+          7: {
+            eng: 0,
+            mec: 1,
+            pil: 2,
+            nav: 3
+          },
+          8: {
+            eng: 0,
+            mec: 1,
+            pil: 2,
+            nav: 3
+          },
+          9: {
+            eng: 0,
+            mec: 1,
+            pil: 2,
+            nav: 3
+          },
+          10:{
+            eng: 0,
+            mec: 1,
+            pil: 2,
+            nav: 3
+          }
         }
       });
     }
