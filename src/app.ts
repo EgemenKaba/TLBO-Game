@@ -1,6 +1,8 @@
 import { TLBO } from './tlbo';
 import { Individual } from 'individual';
 import { GroupedIndividuals } from './individuals-map';
+import * as firebase from 'firebase/app';
+import 'firebase/database';
 
 interface IPreviousCostsDictionary {
     [index: string]: Individual;
@@ -203,6 +205,19 @@ export class App {
         }
 
         this.resources -= Math.trunc(this.currentTotalCosts);
+
+      var pushedRef = firebase.database().ref('games').push({
+        scenario: 1,
+        timestamp: Date.now()
+      });
+      console.log(pushedRef);
+      var pushedRef = firebase.database().ref('games/' + pushedRef.key + '/turns').push({
+        eng: 0,
+        mec: 1,
+        pil: 2,
+        nav: 3
+      });
+      console.log(pushedRef);
     }
 
     fillInEmptyPairings(studentTeacherMap: GroupedIndividuals[], workers: Individual[]) {

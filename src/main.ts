@@ -6,6 +6,7 @@ import {PLATFORM} from 'aurelia-pal';
 import * as Bluebird from 'bluebird';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import * as firebase from 'firebase/app';
 
 // remove out if you don't want a Promise polyfill (remove also from webpack.config.js)
 Bluebird.config({ warnings: { wForgottenReturn: false } });
@@ -31,4 +32,14 @@ export function configure(aurelia: Aurelia) {
   }
 
   aurelia.start().then(() => aurelia.setRoot(PLATFORM.moduleName('app')));
+
+  var config = {
+    apiKey: "AIzaSyDxbyj1sNwfR12hPl5fxDEoh_4UBJzZ9Mo",
+    authDomain: "itp-tlbo.firebaseapp.com",
+    databaseURL: "https://itp-tlbo.firebaseio.com",
+    projectId: "itp-tlbo",
+    storageBucket: "itp-tlbo.appspot.com",
+    messagingSenderId: "729643811214"
+  };
+  firebase.initializeApp(config);
 }
