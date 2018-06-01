@@ -22,10 +22,10 @@
     <div class="row">
       <h3>Summary</h3>
       <div class="col">
-        Total current efficiencies: ${currentTotalCosts | efficiencyFormat:algorithm}
+        Total current efficiencies: ${calculateEfficiency(currentTotalCosts)}
       </div>
       <div class="col">
-        Total previous efficiencies: ${previousTotalCosts | efficiencyFormat:algorithm}
+        Total previous efficiencies: ${calculateEfficiency(previousTotalCosts)}
       </div>
       <div class="col">
         Total current costs: ${currentTotalCosts | costFormat}

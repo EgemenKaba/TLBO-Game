@@ -313,4 +313,12 @@ export class TLBO {
         this.teacher();
         this.student();
     }
+
+    getMaxCost() {
+        return 10 * this.cost([this.nMax, this.nMax, this.nMax, this.nMax]);
+    }
+
+    getMinCost() {
+        return 10 * this.cost([this.nMin, this.nMin, this.nMin, this.nMin]);
+    }
 }

@@ -50,16 +50,10 @@ export class App {
 
     skillCap: number = 25;
 
-    //algorithm = 'rastrigin';
-    algorithm = 'linear';
-
     constructor() {
         this.tlbo = new TLBO();
-        if (this.algorithm === 'rastrigin') {
-            this.tlbo.cost = this.tlbo.rastrigin;
-        } else if (this.algorithm === 'linear') {
-            this.tlbo.cost = this.tlbo.linear;
-        }
+        //this.tlbo.cost = this.tlbo.rastrigin;
+        //this.tlbo.cost = this.tlbo.linear;
 
         this.population.push(new Individual(10,11,10,20,    undefined, '1 Arnaud'));
         this.population.push(new Individual(18,2,3,9,       undefined, '2 Ekkebert'));
@@ -91,7 +85,9 @@ export class App {
         this.refreshSums();
         this.updateTotalCosts();
 
-        this.idleIndividuals = this.tlbo.population;
+        this.tlbo.population.forEach(element => {
+            this.idleIndividuals.push(element);
+        });
     }
 
     drawTLBO() {
@@ -345,6 +341,10 @@ export class App {
 
     sanitizeSkillBoundaries(pos: number, lowerLimit: number, upperLimit: number) {
         return Math.min(upperLimit, Math.max(lowerLimit, pos));
+    }    
+
+    calculateEfficiency(cost) {
+        return ((cost - this.tlbo.getMinCost()) / (this.tlbo.getMaxCost() - this.tlbo.getMinCost()) * 100).toFixed(2);
     }
 
 }
