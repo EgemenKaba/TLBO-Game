@@ -256,6 +256,9 @@ export class App {
     }
 
     rememberPreviousState() {
+        this.population.forEach(element => {
+            this.previousPopulationState[element.id] = Object.assign({}, element);
+        });
         this.idleIndividualsSumPrev = this.idleIndividualsSum;
         this.groupWorkIndividualsSumPrev = this.groupWorkIndividualsSum;
         this.teachingSessionIndividualsSumPrev = this.teachingSessionIndividualsSum;
