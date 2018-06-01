@@ -8,12 +8,42 @@ export class TLBO {
     nMax = 5.12;
     nDesignVariables = 2;
     nGenerations = 10;
-    nPopulation = 25;
+    nPopulation = 10;
 
     currentTeacher: Individual;
     bestSolution: Individual = new Individual(0, 0, 0, 0, Number.POSITIVE_INFINITY);
 
-    constructor() {
+    constructor() {}
+
+    /** for debugging:
+     * rastrigin: 93.24081268239809
+     * linear: 409.59999999999997
+     */
+    initMinimalPopulation() {
+        this.population = [];
+        const minCost = this.cost([this.nMin, this.nMin, this.nMin, this.nMin]);
+        
+        for (let i = 0; i < 10; i++) {
+            this.population.push(new Individual(this.nMin, this.nMin, this.nMin, this.nMin, minCost, 'Dummy'+i));
+        }
+    }
+
+    /** for debugging: 
+     * rastrigin: 8.82483201160156
+     * linear: 0
+     */
+    initMaximalPopulation() {
+        this.population = [];
+        const maxCost = this.cost([this.nMax, this.nMax, this.nMax, this.nMax]);
+        
+        for (let i = 0; i < 10; i++) {
+            this.population.push(new Individual(this.nMax, this.nMax, this.nMax, this.nMax, maxCost, 'Dummy'+i));
+        }
+    }
+
+    initRandomPopulation() {
+        this.population = [];
+
         for (let i = 0; i < this.nPopulation; i++) {
             let rndX = Math.random() * (this.nMax - this.nMin) + this.nMin;
             let rndY = Math.random() * (this.nMax - this.nMin) + this.nMin;
@@ -22,11 +52,21 @@ export class TLBO {
             let rndCst = this.cost([rndX, rndY, rndA, rndB]);
 
             this.population.push(new Individual(rndX, rndY, rndA, rndB, rndCst, this.names.pop()));
-
-            if (rndCst < this.bestSolution.cost) {
-                this.bestSolution = this.population[i];
-            };
         };
+        this.assignBestSolution();
+    }
+
+    setPopulation(population) {
+        this.population = population;
+        this.assignBestSolution();
+    }
+
+    assignBestSolution() {
+        this.population.forEach(element => {
+            if (element.cost < this.bestSolution.cost) {
+                this.bestSolution = element;
+            };
+        });
     }
 
     linear(x) {
@@ -52,7 +92,7 @@ export class TLBO {
     }
 
     cost(x) {
-        return this.rastrigin(x);
+        return this.linear(x);
     }
 
     evaluate(element, newX, newY, newA, newB) {

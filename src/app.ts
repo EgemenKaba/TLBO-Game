@@ -13,7 +13,9 @@ export class App {
 
     canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
-    tlbo: TLBO = new TLBO();
+    
+    tlbo: TLBO;
+    population: Individual[] = [];
 
     studentTeacherMap: GroupedIndividuals[] = [];
     previousPopulationState = {} as IPreviousCostsDictionary;
@@ -38,23 +40,57 @@ export class App {
     groupWorkIndividualsSum: number = 0;
     teachingSessionIndividualsSum: number = 0;
     currentTotalCosts: number = 0;
+    currentEfficiency: number = 0;
 
     idleIndividualsSumPrev: number;
     groupWorkIndividualsSumPrev: number;
     teachingSessionIndividualsSumPrev: number;
     previousTotalCosts: number;
+    previousEfficency: number = 0;
 
     skillCap: number = 25;
 
-    attached() {
+    //algorithm = 'rastrigin';
+    algorithm = 'linear';
+
+    constructor() {
+        this.tlbo = new TLBO();
+        if (this.algorithm === 'rastrigin') {
+            this.tlbo.cost = this.tlbo.rastrigin;
+        } else if (this.algorithm === 'linear') {
+            this.tlbo.cost = this.tlbo.linear;
+        }
+
+        this.population.push(new Individual(10,11,10,20,    undefined, '1 Arnaud'));
+        this.population.push(new Individual(18,2,3,9,       undefined, '2 Ekkebert'));
+        this.population.push(new Individual(7,21,18,10,     undefined, '3 Cerdic'));
+        this.population.push(new Individual(16,19,12,12,    undefined, '4 Vanessa'));
+        this.population.push(new Individual(23,5,22,4,      undefined, '5 Behiye'));
+        this.population.push(new Individual(12,11,17,3,     undefined, '6 Alda'));
+        this.population.push(new Individual(13,6,8,14,      undefined, '7 Kuba'));
+        this.population.push(new Individual(18,3,17,21,     undefined, '8 Serhat'));
+        this.population.push(new Individual(4,5,3,20,       undefined, '9 Aritra'));
+        this.population.push(new Individual(1,12,17,2,      undefined, '10 Theotleip'));
+
+        this.population.forEach(element => {
+            element.position.x = this.denormalizePosition(element.position.x);
+            element.position.y = this.denormalizePosition(element.position.y);
+            element.position.a = this.denormalizePosition(element.position.a);
+            element.position.b = this.denormalizePosition(element.position.b);
+
+            element.cost = this.tlbo.cost([element.position.x, element.position.y, element.position.a, element.position.b]);
+        });
+
+        this.tlbo.setPopulation(this.population);
+        
+        //this.tlbo.initMaximalPopulation();
+
         if (this.debug) {
             this.drawTLBO();
         }
         this.refreshSums();
         this.updateTotalCosts();
-    }
 
-    constructor() {
         this.idleIndividuals = this.tlbo.population;
     }
 
@@ -176,9 +212,7 @@ export class App {
     fillInEmptyPairings(studentTeacherMap: GroupedIndividuals[], workers: Individual[]) {
         studentTeacherMap.forEach(element => {
             if (!element.teacher) {
-                console.log('filling in');
                 element.teacher = this.getRandomStudent(workers);
-                console.log('filled in ' + element.teacher);
             }
         });
     }
@@ -189,6 +223,10 @@ export class App {
 
     denormalizePosition(normPosition) {
         return normPosition / this.skillCap * (this.tlbo.nMax - this.tlbo.nMin) + this.tlbo.nMin;
+    }
+
+    normalizeCost(cost) {
+        return (cost - 0) / (409.60 - 0) * 100;
     }
 
     scalePosition(position) {
@@ -208,6 +246,13 @@ export class App {
     updateTotalCosts() {
         this.previousTotalCosts = this.currentTotalCosts;
         this.currentTotalCosts = this.summarizeCost(this.tlbo.population);
+
+        /*
+        if ('rastrigin' === this.algorithm) {
+            return (100 - (this.currentTotalCosts - 8.82483201160156) / (93.24081268239809 - 8.82483201160156) * 100).toFixed(2);
+        } else if ('linear' === this.algorithm) {
+            return (100 - (this.currentTotalCosts - 0) / (409.59999999999997 - 0) * 100).toFixed(2);
+        }*/
     }
 
     rememberPreviousState() {
@@ -221,18 +266,18 @@ export class App {
 
         let normalizedPositionX = this.normalizePosition(student.position.x) + Number.parseFloat(this.boostParameterOne);
         let normalizedPositionY = this.normalizePosition(student.position.y) + Number.parseFloat(this.boostParameterTwo);
-        let normalizedPositionA = this.normalizePosition(student.position.x) + Number.parseFloat(this.boostParameterThree);
-        let normalizedPositionB = this.normalizePosition(student.position.y) + Number.parseFloat(this.boostParameterFour);
+        let normalizedPositionA = this.normalizePosition(student.position.a) + Number.parseFloat(this.boostParameterThree);
+        let normalizedPositionB = this.normalizePosition(student.position.b) + Number.parseFloat(this.boostParameterFour);
 
-        student.position.x = this.denormalizePosition(normalizedPositionX);
-        student.position.y = this.denormalizePosition(normalizedPositionY);
-        student.position.a = this.denormalizePosition(normalizedPositionA);
-        student.position.b = this.denormalizePosition(normalizedPositionB);
+        student.position.x = this.sanitizeSkillBoundaries(normalizedPositionX, 0, this.skillCap);
+        student.position.y = this.sanitizeSkillBoundaries(normalizedPositionY, 0, this.skillCap);
+        student.position.a = this.sanitizeSkillBoundaries(normalizedPositionA, 0, this.skillCap);
+        student.position.b = this.sanitizeSkillBoundaries(normalizedPositionB, 0, this.skillCap);
 
-        student.position.x = this.sanitizeSkillBoundaries(student.position.x, 0, this.skillCap);
-        student.position.y = this.sanitizeSkillBoundaries(student.position.y, 0, this.skillCap);
-        student.position.a = this.sanitizeSkillBoundaries(student.position.a, 0, this.skillCap);
-        student.position.b = this.sanitizeSkillBoundaries(student.position.b, 0, this.skillCap);
+        student.position.x = this.denormalizePosition(student.position.x);
+        student.position.y = this.denormalizePosition(student.position.y);
+        student.position.a = this.denormalizePosition(student.position.a);
+        student.position.b = this.denormalizePosition(student.position.b);
 
         student.cost = this.tlbo.cost([student.position.x, student.position.y, student.position.a, student.position.b]);
 
