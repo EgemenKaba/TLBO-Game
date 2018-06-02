@@ -145,6 +145,7 @@ export class App {
     simulateTeaching() {
         if (this.teachingSessionIndividuals && this.teachingSessionIndividuals.length > 0) {
             let teacher = this.tlbo.getBestPerformingIndividual(this.teachingSessionIndividuals);
+            console.log(teacher);
             this.tlbo.teachPopulation(teacher, this.teachingSessionIndividuals);
         }
     }
@@ -152,6 +153,7 @@ export class App {
     simulateLearning() {
         if (this.studentTeacherMap && this.studentTeacherMap.length > 0) {
             this.fillInEmptyPairings(this.studentTeacherMap, this.groupWorkIndividuals);
+            console.log(this.studentTeacherMap);
             this.tlbo.exchangeKnowledge(this.studentTeacherMap);
         }
     }
@@ -251,9 +253,13 @@ export class App {
     };
 
     fillInEmptyPairings(studentTeacherMap: GroupedIndividuals[], workers: Individual[]) {
-        studentTeacherMap.forEach(element => {
+        studentTeacherMap.forEach((element, index) => {
             if (!element.teacher) {
-                element.teacher = this.getRandomStudent(workers);
+                let candidates = Array.apply(null, {length: workers.length}).map(Number.call, Number);
+                candidates.splice(index,1);
+                let teacherIndex = candidates[Math.floor(Math.random() * (workers.length - 1))];
+
+                element.teacher = workers[teacherIndex];
             }
         });
     }
@@ -350,15 +356,11 @@ export class App {
         });
         this.teachingSessionIndividuals = [];
 
-        this.groupWorkIndividuals.forEach(element => {
-            this.idleIndividuals.push(element);
-        });
-        this.groupWorkIndividuals = [];
-
         this.studentTeacherMap.forEach(element => {
             this.idleIndividuals.push(element.student);
         });
         this.studentTeacherMap = [];
+        this.groupWorkIndividuals = [];
 
         this.upskillingIndividuals.forEach(element => {
             this.idleIndividuals.push(element);
