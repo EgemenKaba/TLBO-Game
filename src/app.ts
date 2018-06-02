@@ -142,21 +142,28 @@ export class App {
         });
     };
 
+    simulateTeaching() {
+        if (this.teachingSessionIndividuals && this.teachingSessionIndividuals.length > 0) {
+            let teacher = this.tlbo.getBestPerformingIndividual(this.teachingSessionIndividuals);
+            this.tlbo.teachPopulation(teacher, this.teachingSessionIndividuals);
+        }
+    }
+
+    simulateLearning() {
+        if (this.studentTeacherMap && this.studentTeacherMap.length > 0) {
+            this.fillInEmptyPairings(this.studentTeacherMap, this.groupWorkIndividuals);
+            this.tlbo.exchangeKnowledge(this.studentTeacherMap);
+        }
+    }
+
     simulateNextRound() {
         this.rememberPreviousState();
 
         if (this.autopilot) {
             this.tlbo.cycle();
         } else {
-            if (this.teachingSessionIndividuals && this.teachingSessionIndividuals.length > 0) {
-                this.selectedTeacher = this.selectedTeacher || this.getRandomStudent(this.teachingSessionIndividuals);
-                this.tlbo.teachPopulation(this.selectedTeacher, this.teachingSessionIndividuals);
-            }
-
-            if (this.studentTeacherMap && this.studentTeacherMap.length > 0) {
-                this.fillInEmptyPairings(this.studentTeacherMap, this.groupWorkIndividuals);
-                this.tlbo.exchangeKnowledge(this.studentTeacherMap);
-            }
+            this.simulateTeaching();
+            this.simulateLearning();
         }
 
         this.refreshSums();
@@ -236,6 +243,12 @@ export class App {
         }
       });
     }
+
+    cleanupPairings(studentTeacherMap: GroupedIndividuals[]) {
+        studentTeacherMap.forEach(element => {
+            element.teacher = undefined;
+        })
+    };
 
     fillInEmptyPairings(studentTeacherMap: GroupedIndividuals[], workers: Individual[]) {
         studentTeacherMap.forEach(element => {
@@ -329,6 +342,31 @@ export class App {
         }
 
         return this.tlbo.population[Math.floor(Math.random() * this.tlbo.population.length)];
+    }
+
+    setAllIndividualsToIdling() {
+        this.teachingSessionIndividuals.forEach(element => {
+            this.idleIndividuals.push(element);
+        });
+        this.teachingSessionIndividuals = [];
+
+        this.groupWorkIndividuals.forEach(element => {
+            this.idleIndividuals.push(element);
+        });
+        this.groupWorkIndividuals = [];
+
+        this.studentTeacherMap.forEach(element => {
+            this.idleIndividuals.push(element.student);
+        });
+        this.studentTeacherMap = [];
+
+        this.upskillingIndividuals.forEach(element => {
+            this.idleIndividuals.push(element);
+        });
+        this.upskillingIndividuals = [];
+
+        this.idleIndividuals.sort(this.individualsComparatorById);
+        this.refreshSums();
     }
 
     changeGroups(source: Individual[], destination: Individual[], individual: Individual) {

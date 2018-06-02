@@ -4,8 +4,8 @@
   <require from="./cost-format"></require>
 
   <div class="container">
-    <h3>Settings</h3>
     <div clas="row">
+      <h3>Settings</h3>
       <lable for="visualisation">Visualisation</lable>
       <input id="visualisation" type="checkbox" checked.two-way="debug">
       <lable for="auto-pilot">Autopilot</lable>
@@ -80,7 +80,6 @@
           <th>Upcoming costs</th>
           <th>Previous costs</th>
           <th>Actions</th>
-          <th>Pairing</th>
         </thead>
         <tbody>
           <tr repeat.for="r of studentTeacherMap">
@@ -98,9 +97,6 @@
                 <button class="btn btn-outline-secondary" click.delegate="changeGroupsFromGroupwork(studentTeacherMap, upskillingIndividuals, r.student)">Upskilling</button>
               </div>
             </td>
-            <td>
-              <teacher-dropdown items.bind="groupWorkIndividuals" selected-item.bind="r.teacher"></teacher-dropdown>
-            </td>
           </tr>
           <tr>
             <td colspan="5" class="font-weight-bold">Total</td>
@@ -116,9 +112,6 @@
       <div class="container">
         <div class="row">
             <h3>Campfire population</h3>
-        </div>
-        <div class="row">
-            With teacher:   <teacher-dropdown items.bind="teachingSessionIndividuals" selected-item.bind="selectedTeacher"></teacher-dropdown>
         </div>
         <div class="row">
           <table class="table">
@@ -214,6 +207,7 @@
 
     <div class="row">
       <button class="btn btn-primary btn-lg" click.delegate="simulateNextRound()">Simulate the next round</button>
+      <button class="btn btn-secondary btn-lg" click.delegate="setAllIndividualsToIdling()">Back to idling</button>
     </div>
 
     <div class="row" if.bind="debug">
