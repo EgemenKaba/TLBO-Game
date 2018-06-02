@@ -24,7 +24,7 @@ export class TLBO {
         const minCost = this.cost([this.nMin, this.nMin, this.nMin, this.nMin]);
         
         for (let i = 0; i < 10; i++) {
-            this.population.push(new Individual(this.nMin, this.nMin, this.nMin, this.nMin, minCost, 'Dummy'+i));
+            this.population.push(new Individual(this.nMin, this.nMin, this.nMin, this.nMin, minCost, i, 'Dummy'));
         }
     }
 
@@ -37,7 +37,7 @@ export class TLBO {
         const maxCost = this.cost([this.nMax, this.nMax, this.nMax, this.nMax]);
         
         for (let i = 0; i < 10; i++) {
-            this.population.push(new Individual(this.nMax, this.nMax, this.nMax, this.nMax, maxCost, 'Dummy'+i));
+            this.population.push(new Individual(this.nMax, this.nMax, this.nMax, this.nMax, maxCost, i, 'Dummy'));
         }
     }
 
@@ -51,7 +51,7 @@ export class TLBO {
             let rndB = Math.random() * (this.nMax - this.nMin) + this.nMin;
             let rndCst = this.cost([rndX, rndY, rndA, rndB]);
 
-            this.population.push(new Individual(rndX, rndY, rndA, rndB, rndCst, this.names.pop()));
+            this.population.push(new Individual(rndX, rndY, rndA, rndB, rndCst, i, this.names.pop()));
         };
         this.assignBestSolution();
     }

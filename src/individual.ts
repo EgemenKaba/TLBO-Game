@@ -1,9 +1,10 @@
 export class Individual {
-    id: string
+    id: number;
+    name: string;
     cost: number;
     position: Position;
 
-    constructor(x: number, y: number, a: number, b: number, cost: number, id: string = '') {
+    constructor(x: number, y: number, a: number, b: number, cost: number, id: number = undefined, name: string = '') {
         this.position = {
             x: x,
             y: y,
@@ -11,11 +12,12 @@ export class Individual {
             b: b
         };
         this.cost = cost;
+        this.name = name;
         this.id = id;
     }
 
     toString() {
-        return (this.id && 'id: ' + this.id || '') + 'x: ' + this.position.x + ' y: ' + this.position.y + 'a: ' + this.position.a + 'b: ' + this.position.b + ' cost: ' + this.cost;
+        return 'id: ' + this.id + (this.name && 'name: ' + this.name || '') + 'x: ' + this.position.x + ' y: ' + this.position.y + 'a: ' + this.position.a + 'b: ' + this.position.b + ' cost: ' + this.cost;
     }
 }
 

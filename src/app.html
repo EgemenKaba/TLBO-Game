@@ -2,30 +2,23 @@
   <require from="./teacher-dropdown"></require>
   <require from="./number-format"></require>
   <require from="./cost-format"></require>
-  <require from="./efficiency-format"></require>
 
   <div class="container">
+    <h3>Settings</h3>
     <div clas="row">
-      <h3>Settings</h3>
       <lable for="visualisation">Visualisation</lable>
       <input id="visualisation" type="checkbox" checked.two-way="debug">
       <lable for="auto-pilot">Autopilot</lable>
       <input id="auto-pilot" type="checkbox" checked.two-way="autopilot">
     </div>
 
-    <div clas="row">
-      <h3>Resource management</h3>
-      <lable for="remainingResources">Remaining supplies</lable>
-      <input id="remainingResources" type="number" value.two-way="resources">
-    </div>
-
     <div class="row">
       <h3>Summary</h3>
       <div class="col">
-        Total current efficiencies: ${calculateEfficiency(currentTotalCosts)}
+        Total current efficiency: ${calculateEfficiency(currentTotalCosts)}
       </div>
       <div class="col">
-        Total previous efficiencies: ${calculateEfficiency(previousTotalCosts)}
+        Total previous efficiency: ${calculateEfficiency(previousTotalCosts)}
       </div>
       <div class="col">
         Total current costs: ${currentTotalCosts | costFormat}
@@ -39,7 +32,7 @@
       <h3>Idle population</h3>
       <table class="table">
         <thead>
-          <th>Name</th>
+          <th>ID</th>
           <th>Engineering</th>
           <th>Mechanics</th>
           <th>Piloting</th>
@@ -58,8 +51,11 @@
             <td>${r.cost | costFormat}</td>
             <td>${previousPopulationState[r.id].cost | costFormat}</td>
             <td>
-              <button class="btn btn-outline-secondary" click.delegate="changeGroupsToGroupWork(idleIndividuals, studentTeacherMap, r)">Group work</button>
-              <button class="btn btn-outline-secondary" click.delegate="changeGroups(idleIndividuals, teachingSessionIndividuals, r)">Teaching session</button>
+              <div class="btn-group" role="group" aria-label="Changing groups">
+                <button class="btn btn-outline-secondary" click.delegate="changeGroupsToGroupWork(idleIndividuals, studentTeacherMap, r)">Plane</button>
+                <button class="btn btn-outline-secondary" click.delegate="changeGroups(idleIndividuals, teachingSessionIndividuals, r)">Campfire</button>
+                <button class="btn btn-outline-secondary" click.delegate="changeGroups(idleIndividuals, upskillingIndividuals, r)">Upskilling</button>
+              </div>
             </td>
           </tr>
           <tr>
@@ -73,10 +69,10 @@
     </div>
 
     <div class="row">
-      <h3>Group work population</h3>
+      <h3>Plane population</h3>
       <table class="table">
         <thead>
-          <th>Name</th>
+          <th>ID</th>
           <th>Engineering</th>
           <th>Mechanics</th>
           <th>Piloting</th>
@@ -96,8 +92,11 @@
             <td>${r.student.cost | costFormat}</td>
             <td>${previousPopulationState[r.student.id].cost | costFormat}</td>
             <td>
-              <button class="btn btn-outline-secondary" click.delegate="changeGroupsFromGroupwork(studentTeacherMap, idleIndividuals, r.student)">Idling</button>
-              <button class="btn btn-outline-secondary" click.delegate="changeGroupsFromGroupwork(studentTeacherMap, teachingSessionIndividuals, r.student)">Teaching session</button>
+              <div class="btn-group" role="group" aria-label="Changing groups">
+                <button class="btn btn-outline-secondary" click.delegate="changeGroupsFromGroupwork(studentTeacherMap, idleIndividuals, r.student)">Idling</button>
+                <button class="btn btn-outline-secondary" click.delegate="changeGroupsFromGroupwork(studentTeacherMap, teachingSessionIndividuals, r.student)">Campfire</button>
+                <button class="btn btn-outline-secondary" click.delegate="changeGroupsFromGroupwork(studentTeacherMap, upskillingIndividuals, r.student)">Upskilling</button>
+              </div>
             </td>
             <td>
               <teacher-dropdown items.bind="groupWorkIndividuals" selected-item.bind="r.teacher"></teacher-dropdown>
@@ -116,7 +115,7 @@
     <div class="row">
       <div class="container">
         <div class="row">
-            <h3>Teaching session population</h3>
+            <h3>Campfire population</h3>
         </div>
         <div class="row">
             With teacher:   <teacher-dropdown items.bind="teachingSessionIndividuals" selected-item.bind="selectedTeacher"></teacher-dropdown>
@@ -124,7 +123,7 @@
         <div class="row">
           <table class="table">
               <thead>
-                <th>Name</th>
+                <th>ID</th>
                 <th>Engineering</th>
                 <th>Mechanics</th>
                 <th>Piloting</th>
@@ -143,8 +142,11 @@
                   <td>${r.cost | costFormat}</td>
                   <td>${previousPopulationState[r.id].cost | costFormat}</td>
                   <td>
-                    <button class="btn btn-outline-secondary" click.delegate="changeGroups(teachingSessionIndividuals, idleIndividuals, r)">Idling</button>
-                    <button class="btn btn-outline-secondary" click.delegate="changeGroupsToGroupWork(teachingSessionIndividuals, studentTeacherMap, r)">Group work</button>
+                    <div class="btn-group" role="group" aria-label="Changing groups">
+                      <button class="btn btn-outline-secondary" click.delegate="changeGroups(teachingSessionIndividuals, idleIndividuals, r)">Idling</button>
+                      <button class="btn btn-outline-secondary" click.delegate="changeGroupsToGroupWork(teachingSessionIndividuals, studentTeacherMap, r)">Plane</button>
+                      <button class="btn btn-outline-secondary" click.delegate="changeGroups(teachingSessionIndividuals, upskillingIndividuals, r)">Upskilling</button>
+                    </div>
                   </td>
                 </tr>
                 <tr>
@@ -160,28 +162,58 @@
     </div>
 
     <div class="row">
-      <button class="btn btn-primary btn-lg" click.delegate="simulateNextRound()">Simulate the next round</button>
+      <div class="container">
+        <div class="row">
+            <h3>Upskilling individuals</h3>
+        </div>
+        <div class="row">
+          <table class="table">
+              <thead>
+                <th>ID</th>
+                <th>Engineering</th>
+                <th>Mechanics</th>
+                <th>Piloting</th>
+                <th>Navigation</th>
+                <th>Upcoming costs</th>
+                <th>Previous costs</th>
+                <th>Actions</th>
+              </thead>
+              <tbody>
+                <tr repeat.for="r of upskillingIndividuals">
+                  <td>${r.id}</td>
+                  <td>${normalizePosition(r.position.x) | numberFormat}</td>
+                  <td>${normalizePosition(r.position.y) | numberFormat}</td>
+                  <td>${normalizePosition(r.position.a) | numberFormat}</td>
+                  <td>${normalizePosition(r.position.b) | numberFormat}</td>
+                  <td>${r.cost | costFormat}</td>
+                  <td>${previousPopulationState[r.id].cost | costFormat}</td>
+                  <td>
+                    <div class="btn-group" role="group" aria-label="Changing groups">
+                      <button class="btn btn-outline-secondary" click.delegate="changeGroups(upskillingIndividuals, idleIndividuals, r)">Idling</button>
+                      <button class="btn btn-outline-secondary" click.delegate="changeGroupsToGroupWork(upskillingIndividuals, studentTeacherMap, r)">Plane</button>
+                      <button class="btn btn-outline-secondary" click.delegate="changeGroups(upskillingIndividuals, teachingSessionIndividuals, r)">Campfire</button>
+                    </div>
+                    <div class="btn-group" role="group" aria-label="Upskilling options">
+                      <button class="btn btn-outline-primary" click.delegate="starGazing(r)">Stargazing</button>
+                      <button class="btn btn-outline-primary" click.delegate="tinkering(r)">Tinkering</button>
+                      <button class="btn btn-outline-primary" click.delegate="buildingSandCastles(r)">Sandcastles</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="5" class="font-weight-bold">Total</td>
+                  <td>${upskillingIndividualsSum | costFormat}</td>
+                  <td>${upskillingIndividualsSumPrev | costFormat}</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+        </div>
+      </div>
     </div>
 
     <div class="row">
-      <h3>Single lessons</h3>
-      <br/>
-      <lable for="boostParamOne">Delta Engineering</lable>
-      <input id="boostParamOne" type="number" value.two-way="boostParameterOne">
-      <br/>
-      <lable for="boostParamTwo">Delta Mechanics</lable>
-      <input id="boostParamTwo" type="number" value.two-way="boostParameterTwo">
-      <br/>
-      <lable for="boostParamThree">Delta Piloting</lable>
-      <input id="boostParamThree" type="number" value.two-way="boostParameterThree">
-      <br/>
-      <lable for="boostParamFour">Delta Navigation</lable>
-      <input id="boostParamFour" type="number" value.two-way="boostParameterFour">
-      <br/>
-      <lable for="singleLessonForDropdown">Single lesson for</lable>
-      <teacher-dropdown id="singleLessonForDropdown" items.bind="tlbo.population" selected-item.bind="boostedStudent"></teacher-dropdown>
-      <br/>
-      <button class="btn btn-large btn-primary" click.delegate="boostStudent(boostedStudent)">Perform</button>
+      <button class="btn btn-primary btn-lg" click.delegate="simulateNextRound()">Simulate the next round</button>
     </div>
 
     <div class="row" if.bind="debug">

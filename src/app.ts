@@ -5,7 +5,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/database';
 
 interface IPreviousCostsDictionary {
-    [index: string]: Individual;
+    [index: number]: Individual;
 }
 
 export class App {
@@ -24,49 +24,43 @@ export class App {
 
     selectedTeacher: Individual;
 
-    resources: number = 1000;
-
-    boostedStudent: Individual;
-    boostParameterOne: string = '0';
-    boostParameterTwo: string = '0';
-    boostParameterThree: string = '0';
-    boostParameterFour: string = '0';
-
-    loading: boolean = false;
-
     idleIndividuals: Individual[] = [];
     groupWorkIndividuals: Individual[] = [];
     teachingSessionIndividuals: Individual[] = [];
+    upskillingIndividuals: Individual[] = [];
 
     idleIndividualsSum: number = 0;
     groupWorkIndividualsSum: number = 0;
     teachingSessionIndividualsSum: number = 0;
+    upskillingIndividualsSum: number = 0;
     currentTotalCosts: number = 0;
     currentEfficiency: number = 0;
 
     idleIndividualsSumPrev: number;
     groupWorkIndividualsSumPrev: number;
     teachingSessionIndividualsSumPrev: number;
+    upskillingIndividualsSumPrev: number;
     previousTotalCosts: number;
-    previousEfficency: number = 0;
+    previousEfficency: number;
 
     skillCap: number = 25;
+    skillBoost: number = 2;
 
     constructor() {
         this.tlbo = new TLBO();
         //this.tlbo.cost = this.tlbo.rastrigin;
         //this.tlbo.cost = this.tlbo.linear;
 
-        this.population.push(new Individual(10,11,10,20,    undefined, '1 Arnaud'));
-        this.population.push(new Individual(18,2,3,9,       undefined, '2 Ekkebert'));
-        this.population.push(new Individual(7,21,18,10,     undefined, '3 Cerdic'));
-        this.population.push(new Individual(16,19,12,12,    undefined, '4 Vanessa'));
-        this.population.push(new Individual(23,5,22,4,      undefined, '5 Behiye'));
-        this.population.push(new Individual(12,11,17,3,     undefined, '6 Alda'));
-        this.population.push(new Individual(13,6,8,14,      undefined, '7 Kuba'));
-        this.population.push(new Individual(18,3,17,21,     undefined, '8 Serhat'));
-        this.population.push(new Individual(4,5,3,20,       undefined, '9 Aritra'));
-        this.population.push(new Individual(1,12,17,2,      undefined, '10 Theotleip'));
+        this.population.push(new Individual(10,11,10,20,    undefined, 1, 'Arnaud'));
+        this.population.push(new Individual(18,2,3,9,       undefined, 2, 'Ekkebert'));
+        this.population.push(new Individual(7,21,18,10,     undefined, 3, 'Cerdic'));
+        this.population.push(new Individual(16,19,12,12,    undefined, 4, 'Vanessa'));
+        this.population.push(new Individual(23,5,22,4,      undefined, 5, 'Behiye'));
+        this.population.push(new Individual(12,11,17,3,     undefined, 6, 'Alda'));
+        this.population.push(new Individual(13,6,8,14,      undefined, 7, 'Kuba'));
+        this.population.push(new Individual(18,3,17,21,     undefined, 8, 'Serhat'));
+        this.population.push(new Individual(4,5,3,20,       undefined, 9, 'Aritra'));
+        this.population.push(new Individual(1,12,17,2,      undefined, 10, 'Theotleip'));
 
         this.population.forEach(element => {
             element.position.x = this.denormalizePosition(element.position.x);
@@ -85,7 +79,7 @@ export class App {
             this.drawTLBO();
         }
         this.refreshSums();
-        this.updateTotalCosts();
+        this.currentTotalCosts = this.summarizeCost(this.tlbo.population);
 
         this.tlbo.population.forEach(element => {
             this.idleIndividuals.push(element);
@@ -147,38 +141,6 @@ export class App {
             this.drawIndividual(element.position.x, element.position.y, 'purple');
         });
     };
-    /*
-      advanceCycle() {
-        this.rememberPreviousState();
-        this.tlbo.cycle();
-        this.context.clearRect(0, 0, 1024, 1024);
-        this.drawTLBO();
-        this.updateTotalCosts();
-        this.resources -= this.currentTotalCosts;
-      };
-    
-      performAppointment() {
-        this.tlbo.appointTeacher();
-        this.drawTLBO();
-      };
-    
-      performTeaching() {
-        this.rememberPreviousState();
-        this.tlbo.currentTeacher = this.selectedTeacher || this.getRandomStudent();
-        this.tlbo.teachLearners();
-        this.drawTLBO();
-        this.updateTotalCosts();
-        this.resources -= this.currentTotalCosts;
-      };
-    
-      performLearning() {
-        this.rememberPreviousState();
-        this.tlbo.student(this.studentTeacherMap);
-        this.drawTLBO();
-        this.updateTotalCosts();
-        this.resources -= this.currentTotalCosts;
-      }
-    */
 
     simulateNextRound() {
         this.rememberPreviousState();
@@ -203,8 +165,6 @@ export class App {
         if (this.debug) {
             this.drawTLBO();
         }
-
-        this.resources -= Math.trunc(this.currentTotalCosts);
 
       var gameRef = firebase.database().ref('games').push({
         scenario: 1,
@@ -314,13 +274,6 @@ export class App {
     updateTotalCosts() {
         this.previousTotalCosts = this.currentTotalCosts;
         this.currentTotalCosts = this.summarizeCost(this.tlbo.population);
-
-        /*
-        if ('rastrigin' === this.algorithm) {
-            return (100 - (this.currentTotalCosts - 8.82483201160156) / (93.24081268239809 - 8.82483201160156) * 100).toFixed(2);
-        } else if ('linear' === this.algorithm) {
-            return (100 - (this.currentTotalCosts - 0) / (409.59999999999997 - 0) * 100).toFixed(2);
-        }*/
     }
 
     rememberPreviousState() {
@@ -332,13 +285,25 @@ export class App {
         this.teachingSessionIndividualsSumPrev = this.teachingSessionIndividualsSum;
     }
 
-    boostStudent(individual: Individual) {
+    starGazing(i: Individual) {
+        this.boostStudent(i, 0, 0, this.skillBoost, this.skillBoost);
+    }
+
+    tinkering(i: Individual) {
+        this.boostStudent(i, this.skillBoost, this.skillBoost, 0, 0);
+    }
+
+    buildingSandCastles(i: Individual) {
+        this.boostStudent(i, this.skillBoost, 0, 0, 0);
+    }
+
+    boostStudent(individual: Individual, eng: number, mech: number, pilot: number, nav: number) {
         let student: Individual = individual || this.getRandomStudent(this.tlbo.population);
 
-        let normalizedPositionX = this.normalizePosition(student.position.x) + Number.parseFloat(this.boostParameterOne);
-        let normalizedPositionY = this.normalizePosition(student.position.y) + Number.parseFloat(this.boostParameterTwo);
-        let normalizedPositionA = this.normalizePosition(student.position.a) + Number.parseFloat(this.boostParameterThree);
-        let normalizedPositionB = this.normalizePosition(student.position.b) + Number.parseFloat(this.boostParameterFour);
+        let normalizedPositionX = this.normalizePosition(student.position.x) + eng;
+        let normalizedPositionY = this.normalizePosition(student.position.y) + mech;
+        let normalizedPositionA = this.normalizePosition(student.position.a) + pilot;
+        let normalizedPositionB = this.normalizePosition(student.position.b) + nav;
 
         student.position.x = this.sanitizeSkillBoundaries(normalizedPositionX, 0, this.skillCap);
         student.position.y = this.sanitizeSkillBoundaries(normalizedPositionY, 0, this.skillCap);
@@ -352,7 +317,10 @@ export class App {
 
         student.cost = this.tlbo.cost([student.position.x, student.position.y, student.position.a, student.position.b]);
 
+        this.previousPopulationState[individual.id] = individual;
         this.currentTotalCosts = this.summarizeCost(this.tlbo.population);
+        this.upskillingIndividualsSumPrev = this.upskillingIndividualsSumPrev;
+        this.upskillingIndividualsSum = this.summarizeCost(this.upskillingIndividuals);
     }
 
     getRandomStudent(pop: Individual[] = undefined) {
@@ -366,6 +334,7 @@ export class App {
     changeGroups(source: Individual[], destination: Individual[], individual: Individual) {
         source.splice(source.indexOf(individual), 1);
         destination.push(individual);
+        destination.sort(this.individualsComparatorById);
 
         // this is dirty
         this.refreshSums();
@@ -378,6 +347,7 @@ export class App {
             }
         ), 1);
         destination.push(individual);
+        destination.sort(this.individualsComparatorById);
 
         // this is dirty
         this.groupWorkIndividuals.splice(this.groupWorkIndividuals.indexOf(individual), 1);
@@ -387,6 +357,9 @@ export class App {
     changeGroupsToGroupWork(source: Individual[], destination: GroupedIndividuals[], individual: Individual) {
         source.splice(source.indexOf(individual), 1);
         destination.push(new GroupedIndividuals(individual, undefined));
+        destination.sort((a, b) => {
+            return a.student.id - b.student.id;
+        });
 
         // this is dirty
         this.groupWorkIndividuals.push(individual);
@@ -416,7 +389,12 @@ export class App {
     }    
 
     calculateEfficiency(cost) {
+        if (!cost) return undefined;
         return ((cost - this.tlbo.getMinCost()) / (this.tlbo.getMaxCost() - this.tlbo.getMinCost()) * 100).toFixed(2);
+    }
+
+    individualsComparatorById(a: Individual, b:Individual) {
+        return a.id - b.id;
     }
 
 }
