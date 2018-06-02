@@ -167,7 +167,8 @@ export class App {
             this.simulateTeaching();
             this.simulateLearning();
         }
-
+        
+        this.sanitizeStudents();
         this.refreshSums();
         this.updateTotalCosts();
 
@@ -316,6 +317,27 @@ export class App {
         this.boostStudent(i, this.skillBoost, 0, 0, 0);
     }
 
+    sanitizeStudents() {
+        this.tlbo.population.forEach(student => {
+            let normalizedPositionX = this.normalizePosition(student.position.x);
+            let normalizedPositionY = this.normalizePosition(student.position.y);
+            let normalizedPositionA = this.normalizePosition(student.position.a);
+            let normalizedPositionB = this.normalizePosition(student.position.b);
+    
+            student.position.x = this.sanitizeSkillBoundaries(normalizedPositionX, 1, this.skillCap);
+            student.position.y = this.sanitizeSkillBoundaries(normalizedPositionY, 1, this.skillCap);
+            student.position.a = this.sanitizeSkillBoundaries(normalizedPositionA, 1, this.skillCap);
+            student.position.b = this.sanitizeSkillBoundaries(normalizedPositionB, 1, this.skillCap);
+    
+            student.position.x = this.denormalizePosition(student.position.x);
+            student.position.y = this.denormalizePosition(student.position.y);
+            student.position.a = this.denormalizePosition(student.position.a);
+            student.position.b = this.denormalizePosition(student.position.b);
+    
+            student.cost = this.tlbo.cost([student.position.x, student.position.y, student.position.a, student.position.b]);
+        });
+    }
+
     boostStudent(individual: Individual, eng: number, mech: number, pilot: number, nav: number) {
         let student: Individual = individual || this.getRandomStudent(this.tlbo.population);
 
@@ -324,10 +346,10 @@ export class App {
         let normalizedPositionA = this.normalizePosition(student.position.a) + pilot;
         let normalizedPositionB = this.normalizePosition(student.position.b) + nav;
 
-        student.position.x = this.sanitizeSkillBoundaries(normalizedPositionX, 0, this.skillCap);
-        student.position.y = this.sanitizeSkillBoundaries(normalizedPositionY, 0, this.skillCap);
-        student.position.a = this.sanitizeSkillBoundaries(normalizedPositionA, 0, this.skillCap);
-        student.position.b = this.sanitizeSkillBoundaries(normalizedPositionB, 0, this.skillCap);
+        student.position.x = this.sanitizeSkillBoundaries(normalizedPositionX, 1, this.skillCap);
+        student.position.y = this.sanitizeSkillBoundaries(normalizedPositionY, 1, this.skillCap);
+        student.position.a = this.sanitizeSkillBoundaries(normalizedPositionA, 1, this.skillCap);
+        student.position.b = this.sanitizeSkillBoundaries(normalizedPositionB, 1, this.skillCap);
 
         student.position.x = this.denormalizePosition(student.position.x);
         student.position.y = this.denormalizePosition(student.position.y);
