@@ -34,19 +34,26 @@ export class App {
     teachingSessionIndividualsSum: number = 0;
     upskillingIndividualsSum: number = 0;
     currentTotalCosts: number = 0;
-    currentEfficiency: number = 0;
 
     idleIndividualsSumPrev: number;
     groupWorkIndividualsSumPrev: number;
     teachingSessionIndividualsSumPrev: number;
     upskillingIndividualsSumPrev: number;
     previousTotalCosts: number;
-    previousEfficency: number;
 
     skillCap: number = 25;
     skillBoost: number = 2;
 
+    gameRef;
+    scenario: string = 'level 1 - linear algorithm';
+
     constructor() {
+        this.gameRef = firebase.database().ref('games').push({
+            scenario: this.scenario,
+            timestamp: Date.now()
+          }
+        );
+
         this.tlbo = new TLBO();
         //this.tlbo.cost = this.tlbo.rastrigin;
         //this.tlbo.cost = this.tlbo.linear;
@@ -84,6 +91,9 @@ export class App {
         this.tlbo.population.forEach(element => {
             this.idleIndividuals.push(element);
         });
+
+        this.persistState(this.tlbo.population, this.calculateEfficiency(this.currentTotalCosts));
+        this.scenario += 1;
     }
 
     drawTLBO() {
@@ -158,6 +168,26 @@ export class App {
         }
     }
 
+    persistState(population: Individual[], efficiency: number) {
+        let characters: Object = {};
+        population.forEach((element) => {
+            characters[element.id] = {
+                name: element.name,
+                eng: Math.round(this.normalizePosition(element.position.x)),
+                mec: Math.round(this.normalizePosition(element.position.y)),
+                pil: Math.round(this.normalizePosition(element.position.a)),
+                nav: Math.round(this.normalizePosition(element.position.b))
+            }
+        });
+        
+        firebase.database().ref('games/' + this.gameRef.key + '/turns/').push(
+            {
+                efficiency: efficiency.toFixed(2),
+                characters: characters
+            }
+        );
+    };
+
     simulateNextRound() {
         this.rememberPreviousState();
 
@@ -167,7 +197,7 @@ export class App {
             this.simulateTeaching();
             this.simulateLearning();
         }
-        
+
         this.sanitizeStudents();
         this.refreshSums();
         this.updateTotalCosts();
@@ -176,75 +206,8 @@ export class App {
             this.drawTLBO();
         }
 
-      var gameRef = firebase.database().ref('games').push({
-        scenario: 1,
-        timestamp: Date.now()
-      });
-      firebase.database().ref('games/' + gameRef.key + '/turns/').push({
-        efficiency: 13.37,
-        characters: {
-          1: {
-            eng: 0,
-            mec: 1,
-            pil: 2,
-            nav: 3
-          },
-          2: {
-            eng: 0,
-            mec: 1,
-            pil: 2,
-            nav: 3
-          },
-          3: {
-            eng: 0,
-            mec: 1,
-            pil: 2,
-            nav: 3
-          },
-          4: {
-            eng: 0,
-            mec: 1,
-            pil: 2,
-            nav: 3
-          },
-          5: {
-            eng: 0,
-            mec: 1,
-            pil: 2,
-            nav: 3
-          },
-          6: {
-            eng: 0,
-            mec: 1,
-            pil: 2,
-            nav: 3
-          },
-          7: {
-            eng: 0,
-            mec: 1,
-            pil: 2,
-            nav: 3
-          },
-          8: {
-            eng: 0,
-            mec: 1,
-            pil: 2,
-            nav: 3
-          },
-          9: {
-            eng: 0,
-            mec: 1,
-            pil: 2,
-            nav: 3
-          },
-          10:{
-            eng: 0,
-            mec: 1,
-            pil: 2,
-            nav: 3
-          }
-        }
-      });
+        this.persistState(this.tlbo.population, this.calculateEfficiency(this.currentTotalCosts));
+        this.scenario += 1;
     }
 
     cleanupPairings(studentTeacherMap: GroupedIndividuals[]) {
@@ -450,9 +413,9 @@ export class App {
         return Math.min(upperLimit, Math.max(lowerLimit, pos));
     }    
 
-    calculateEfficiency(cost) {
+    calculateEfficiency(cost: number): number {
         if (!cost) return undefined;
-        return ((cost - this.tlbo.getMinCost()) / (this.tlbo.getMaxCost() - this.tlbo.getMinCost()) * 100).toFixed(2);
+        return ((cost - this.tlbo.getMinCost()) / (this.tlbo.getMaxCost() - this.tlbo.getMinCost()) * 100);
     }
 
     individualsComparatorById(a: Individual, b:Individual) {

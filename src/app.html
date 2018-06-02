@@ -15,10 +15,10 @@
     <div class="row">
       <h3>Summary</h3>
       <div class="col">
-        Total current efficiency: ${calculateEfficiency(currentTotalCosts)}
+        Total current efficiency: ${calculateEfficiency(currentTotalCosts).toFixed(2)}
       </div>
       <div class="col">
-        Total previous efficiency: ${calculateEfficiency(previousTotalCosts)}
+        Total previous efficiency: ${calculateEfficiency(previousTotalCosts).toFixed(2)}
       </div>
       <div class="col">
         Total current costs: ${currentTotalCosts | costFormat}
