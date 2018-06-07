@@ -186,6 +186,7 @@ export class App {
                 characters: characters
             }
         );
+        
     };
 
     simulateNextRound() {
@@ -197,6 +198,30 @@ export class App {
             this.simulateTeaching();
             this.simulateLearning();
         }
+
+        this.sanitizeStudents();
+        this.refreshSums();
+        this.updateTotalCosts();
+
+        if (this.debug) {
+            this.drawTLBO();
+        }
+
+        this.persistState(this.tlbo.population, this.calculateEfficiency(this.currentTotalCosts));
+        this.scenario += 1;
+    }
+
+    calculateCheating(coord: number) {
+        return (this.tlbo.nMax - coord) * (0.2 + Math.random() * 0.05);
+    }
+    
+    cheat() {
+        this.tlbo.population.forEach(element => {
+            element.position.x += this.calculateCheating(element.position.x);
+            element.position.y += this.calculateCheating(element.position.y);
+            element.position.a += this.calculateCheating(element.position.a);
+            element.position.b += this.calculateCheating(element.position.b);
+        });
 
         this.sanitizeStudents();
         this.refreshSums();

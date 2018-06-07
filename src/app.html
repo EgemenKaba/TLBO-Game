@@ -210,6 +210,11 @@
       <button class="btn btn-secondary btn-lg" click.delegate="setAllIndividualsToIdling()">Back to idling</button>
     </div>
 
+    <div class="row">
+      <h3>For the first level only!</h3>
+      <button class="btn btn-primary btn-lg" click.delegate="cheat()">Cheat</button>
+    </div>
+
     <div class="row" if.bind="debug">
       <h3>Visualization</h3>
       <canvas id="playground" ref="canvas" width="1024" height="1024"></canvas>
