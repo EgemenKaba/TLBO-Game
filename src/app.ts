@@ -1,6 +1,7 @@
 import { TLBO } from './tlbo';
 import { Individual } from 'individual';
 import { GroupedIndividuals } from './individuals-map';
+import { Action } from './action';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 
@@ -45,7 +46,9 @@ export class App {
     skillBoost: number = 2;
 
     gameRef;
-    scenario: string = 'level 1 - linear algorithm';
+    scenario: string = 'linear';
+
+    upskillingActions: Action[] = [Action.SANDCASTLES, Action.STARGAZING, Action.TINKERING];
 
     constructor() {
         this.gameRef = firebase.database().ref('games').push({
@@ -54,20 +57,22 @@ export class App {
           }
         );
 
+        console.log(this.gameRef.path);
+
         this.tlbo = new TLBO();
         //this.tlbo.cost = this.tlbo.rastrigin;
         //this.tlbo.cost = this.tlbo.linear;
 
-        this.population.push(new Individual(10,11,10,20,    undefined, 1, 'Arnaud'));
-        this.population.push(new Individual(18,2,3,9,       undefined, 2, 'Ekkebert'));
-        this.population.push(new Individual(7,21,18,10,     undefined, 3, 'Cerdic'));
+        this.population.push(new Individual(10,11,10,20,    undefined, 1, 'Arnold'));
+        this.population.push(new Individual(18,2,3,9,       undefined, 2, 'Phillip'));
+        this.population.push(new Individual(7,21,18,10,     undefined, 3, 'Cedric'));
         this.population.push(new Individual(16,19,12,12,    undefined, 4, 'Vanessa'));
-        this.population.push(new Individual(23,5,22,4,      undefined, 5, 'Behiye'));
-        this.population.push(new Individual(12,11,17,3,     undefined, 6, 'Alda'));
-        this.population.push(new Individual(13,6,8,14,      undefined, 7, 'Kuba'));
-        this.population.push(new Individual(18,3,17,21,     undefined, 8, 'Serhat'));
-        this.population.push(new Individual(4,5,3,20,       undefined, 9, 'Aritra'));
-        this.population.push(new Individual(1,12,17,2,      undefined, 10, 'Theotleip'));
+        this.population.push(new Individual(23,5,22,4,      undefined, 5, 'Max'));
+        this.population.push(new Individual(12,11,17,3,     undefined, 6, 'Andrea'));
+        this.population.push(new Individual(13,6,8,14,      undefined, 7, 'Kevin'));
+        this.population.push(new Individual(18,3,17,21,     undefined, 8, 'Gerhard'));
+        this.population.push(new Individual(4,5,3,20,       undefined, 9, 'Susan'));
+        this.population.push(new Individual(1,12,17,2,      undefined, 10, 'Thomas'));
 
         this.population.forEach(element => {
             element.position.x = this.denormalizePosition(element.position.x);
@@ -153,10 +158,25 @@ export class App {
     };
 
     simulateTeaching() {
-        if (this.teachingSessionIndividuals && this.teachingSessionIndividuals.length > 0) {
+        if (this.teachingSessionIndividuals && this.teachingSessionIndividuals.length > 1) {
             let teacher = this.tlbo.getBestPerformingIndividual(this.teachingSessionIndividuals);
             console.log(teacher);
             this.tlbo.teachPopulation(teacher, this.teachingSessionIndividuals);
+
+            this.teachingSessionIndividuals.forEach(element => {
+                if (this.previousPopulationState[element.id] && this.previousPopulationState[element.id].action === Action.PLANE) {
+                    element.position.x += this.calculateCheating(element.position.x);
+                    element.position.y += this.calculateCheating(element.position.y);
+                    element.position.a += this.calculateCheating(element.position.a);
+                    element.position.b += this.calculateCheating(element.position.b);
+                }
+                
+                element.action = Action.CAMPFIRE;
+            });
+        } else if (this.teachingSessionIndividuals && this.teachingSessionIndividuals.length == 1) {
+            this.teachingSessionIndividuals.forEach(element => {
+                element.action = Action.IDLING;
+            });
         }
     }
 
@@ -165,6 +185,10 @@ export class App {
             this.fillInEmptyPairings(this.studentTeacherMap, this.groupWorkIndividuals);
             console.log(this.studentTeacherMap);
             this.tlbo.exchangeKnowledge(this.studentTeacherMap);
+
+            this.groupWorkIndividuals.forEach(element => {
+                element.action = Action.PLANE;
+            });
         }
     }
 
@@ -173,6 +197,7 @@ export class App {
         population.forEach((element) => {
             characters[element.id] = {
                 name: element.name,
+                task: element.action,
                 eng: Math.round(this.normalizePosition(element.position.x)),
                 mec: Math.round(this.normalizePosition(element.position.y)),
                 pil: Math.round(this.normalizePosition(element.position.a)),
@@ -182,7 +207,7 @@ export class App {
         
         firebase.database().ref('games/' + this.gameRef.key + '/turns/').push(
             {
-                efficiency: efficiency.toFixed(2),
+                efficiency: Math.round(efficiency),
                 characters: characters
             }
         );
@@ -190,6 +215,8 @@ export class App {
     };
 
     simulateNextRound() {
+        console.log(this.tlbo.population);
+
         this.rememberPreviousState();
 
         if (this.autopilot) {
@@ -197,6 +224,7 @@ export class App {
         } else {
             this.simulateTeaching();
             this.simulateLearning();
+            this.calculateUpskilling();
         }
 
         this.sanitizeStudents();
@@ -293,6 +321,18 @@ export class App {
         this.teachingSessionIndividualsSumPrev = this.teachingSessionIndividualsSum;
     }
 
+    calculateUpskilling() {
+        if (this.upskillingIndividuals && this.upskillingIndividuals.length > 0) {
+            this.upskillingIndividuals.forEach(element => {
+                switch (element.action) {
+                    case Action.STARGAZING: this.starGazing(element); break;
+                    case Action.TINKERING: this.tinkering(element); break;
+                    case Action.SANDCASTLES: this.buildingSandCastles(element); break;
+                }
+            });
+        }
+    }
+
     starGazing(i: Individual) {
         this.boostStudent(i, 0, 0, this.skillBoost, this.skillBoost);
     }
@@ -379,6 +419,10 @@ export class App {
 
         this.idleIndividuals.sort(this.individualsComparatorById);
         this.refreshSums();
+
+        this.idleIndividuals.forEach(element => {
+            element.action = Action.IDLING;
+        });
     }
 
     changeGroups(source: Individual[], destination: Individual[], individual: Individual) {

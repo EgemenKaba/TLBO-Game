@@ -1,8 +1,11 @@
+import { Action } from './action';
+
 export class Individual {
     id: number;
     name: string;
     cost: number;
     position: Position;
+    action: Action = Action.IDLING;
 
     constructor(x: number, y: number, a: number, b: number, cost: number, id: number = undefined, name: string = '') {
         this.position = {

@@ -164,7 +164,7 @@ export class TLBO {
 
         // teacher
         this.population.forEach(element => {
-            let teachingFactor = Math.floor(Math.random() * 2 + 1);
+            let teachingFactor = Math.floor(Math.random() * 4 + 2);
             let newX = element.position.x + Math.random() * this.currentTeacher.position.x - teachingFactor * meanX;
             let newY = element.position.y + Math.random() * this.currentTeacher.position.y - teachingFactor * meanY;
             let newA = element.position.a + Math.random() * this.currentTeacher.position.a - teachingFactor * meanA;

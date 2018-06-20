@@ -1,7 +1,7 @@
 <template>
-  <require from="./teacher-dropdown"></require>
   <require from="./number-format"></require>
   <require from="./cost-format"></require>
+  <require from="./upskilling-dropdown"></require>
 
   <div class="container">
     <div clas="row">
@@ -15,10 +15,10 @@
     <div class="row">
       <h3>Summary</h3>
       <div class="col">
-        Total current efficiency: ${calculateEfficiency(currentTotalCosts).toFixed(2)}
+        Total current efficiency: ${Math.round(calculateEfficiency(currentTotalCosts))}
       </div>
       <div class="col">
-        Total previous efficiency: ${calculateEfficiency(previousTotalCosts).toFixed(2)}
+        Total previous efficiency: ${Math.round(calculateEfficiency(previousTotalCosts))}
       </div>
       <div class="col">
         Total current costs: ${currentTotalCosts | costFormat}
@@ -186,11 +186,7 @@
                       <button class="btn btn-outline-secondary" click.delegate="changeGroupsToGroupWork(upskillingIndividuals, studentTeacherMap, r)">Plane</button>
                       <button class="btn btn-outline-secondary" click.delegate="changeGroups(upskillingIndividuals, teachingSessionIndividuals, r)">Campfire</button>
                     </div>
-                    <div class="btn-group" role="group" aria-label="Upskilling options">
-                      <button class="btn btn-outline-primary" click.delegate="starGazing(r)">Stargazing</button>
-                      <button class="btn btn-outline-primary" click.delegate="tinkering(r)">Tinkering</button>
-                      <button class="btn btn-outline-primary" click.delegate="buildingSandCastles(r)">Sandcastles</button>
-                    </div>
+                    <upskilling-dropdown items.to-view="upskillingActions" selected.two-way="r.action"></upskilling-dropdown>
                   </td>
                 </tr>
                 <tr>
