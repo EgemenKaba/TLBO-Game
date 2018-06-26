@@ -63,16 +63,16 @@ export class App {
         //this.tlbo.cost = this.tlbo.rastrigin;
         //this.tlbo.cost = this.tlbo.linear;
 
-        this.population.push(new Individual(10,11,10,20,    undefined, 1, 'Arnold'));
+        this.population.push(new Individual(10,11,10,20,    undefined, 1, 'Anna'));
         this.population.push(new Individual(18,2,3,9,       undefined, 2, 'Phillip'));
-        this.population.push(new Individual(7,21,18,10,     undefined, 3, 'Cedric'));
+        this.population.push(new Individual(7,21,18,10,     undefined, 3, 'Toshi'));
         this.population.push(new Individual(16,19,12,12,    undefined, 4, 'Vanessa'));
-        this.population.push(new Individual(23,5,22,4,      undefined, 5, 'Max'));
-        this.population.push(new Individual(12,11,17,3,     undefined, 6, 'Andrea'));
-        this.population.push(new Individual(13,6,8,14,      undefined, 7, 'Kevin'));
-        this.population.push(new Individual(18,3,17,21,     undefined, 8, 'Gerhard'));
-        this.population.push(new Individual(4,5,3,20,       undefined, 9, 'Susan'));
-        this.population.push(new Individual(1,12,17,2,      undefined, 10, 'Thomas'));
+        this.population.push(new Individual(23,5,22,4,      undefined, 5, 'Natasha'));
+        this.population.push(new Individual(12,11,17,3,     undefined, 6, 'Andy'));
+        this.population.push(new Individual(13,6,8,14,      undefined, 7, 'Susan'));
+        this.population.push(new Individual(18,3,17,21,     undefined, 8, 'Laura'));
+        this.population.push(new Individual(4,5,3,20,       undefined, 9, 'Patricia'));
+        this.population.push(new Individual(1,12,17,2,      undefined, 10, 'Silvester'));
 
         this.population.forEach(element => {
             element.position.x = this.denormalizePosition(element.position.x);
@@ -175,13 +175,13 @@ export class App {
             });
         } else if (this.teachingSessionIndividuals && this.teachingSessionIndividuals.length == 1) {
             this.teachingSessionIndividuals.forEach(element => {
-                element.action = Action.IDLING;
+                element.action = Action.CAMPFIRE;
             });
         }
     }
 
     simulateLearning() {
-        if (this.studentTeacherMap && this.studentTeacherMap.length > 0) {
+        if (this.studentTeacherMap && this.studentTeacherMap.length > 1) {
             this.fillInEmptyPairings(this.studentTeacherMap, this.groupWorkIndividuals);
             console.log(this.studentTeacherMap);
             this.tlbo.exchangeKnowledge(this.studentTeacherMap);
@@ -189,6 +189,10 @@ export class App {
             this.groupWorkIndividuals.forEach(element => {
                 element.action = Action.PLANE;
             });
+        } else {
+          this.groupWorkIndividuals.forEach(element => {
+            element.action = Action.PLANE;
+          });
         }
     }
 
@@ -388,7 +392,7 @@ export class App {
 
         this.previousPopulationState[individual.id] = individual;
         this.currentTotalCosts = this.summarizeCost(this.tlbo.population);
-        this.upskillingIndividualsSumPrev = this.upskillingIndividualsSumPrev;
+        this.upskillingIndividualsSumPrev = this.upskillingIndividualsSum;
         this.upskillingIndividualsSum = this.summarizeCost(this.upskillingIndividuals);
     }
 
