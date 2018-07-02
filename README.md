@@ -98,25 +98,31 @@ Important note for maintenance:
 #### Added features
 There are a few added features, which helped understanding the algorithm and design levels.
 
+##### Autopilot
 An autopilot, which can be found at the top of the page.
 It bypasses the inputs of the game master and processes the algorithm by the rules of the algorithm.
+
 Important code lines for maintenance:
 * Variable in the view model: [autopilot](https://github.com/EgemenKaba/TLBO-Game/blob/master/src/app.ts#L15)
 * Bypass here: [cycle](https://github.com/EgemenKaba/TLBO-Game/blob/master/src/app.ts#L226)
 * Phase [teacher](https://github.com/EgemenKaba/TLBO-Game/blob/master/src/tlbo.ts#L208)
 * Phase [learner](https://github.com/EgemenKaba/TLBO-Game/blob/master/src/tlbo.ts#L244) without a parameter
 
+##### Visualisation
 The algorithm can be visualised by a checkbox at the top of the page.
 This helped understand the algorithm and how the population behaves in different cost functions.
 However, enabling this slows down the process significantly.
 The visualisation is redrawn when the next round is simulated.
+
 Important code lines for maintenance:
 * Variable in the view model: [debug](https://github.com/EgemenKaba/TLBO-Game/blob/master/src/app.ts#L14)
 * Drawn during the simulation of the next round: [drawTLBO](https://github.com/EgemenKaba/TLBO-Game/blob/master/src/app.ts#L104)
 
+##### Cheating
 A cheat functionality is located at the bottom of the page.
 This was intended to be used in the first round. However, parts of it were utilised to help out the actual algorithm.
 It adds a static bump to all skill levels of the population.
+
 Important code lines for maintenance:
 * Function: [cheat](https://github.com/EgemenKaba/TLBO-Game/blob/master/src/app.ts#L250)
 * Increase can be controlled through the static numbers on this [line](https://github.com/EgemenKaba/TLBO-Game/blob/master/src/app.ts#L247)
